@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'rails'
 require 'action_controller/railtie'
 

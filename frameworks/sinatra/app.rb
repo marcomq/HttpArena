@@ -26,7 +26,7 @@ class App < Sinatra::Base
 
   configure do
     set :server, :puma
-    set :logging, false
+    set :logging, nil
     set :show_exceptions, false
 
     # Disable unused protections

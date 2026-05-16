@@ -775,10 +775,10 @@
   {
     "framework": "simplew",
     "language": "C#",
-    "rps": 74570,
-    "avg_latency": "85.23ms",
-    "p99_latency": "85.23ms",
-    "cpu": "5001.5%",
+    "rps": 74571,
+    "avg_latency": "85.45ms",
+    "p99_latency": "85.45ms",
+    "cpu": "4910.3%",
     "memory": "1.4GiB",
     "connections": 4096,
     "threads": 64,
@@ -786,7 +786,7 @@
     "pipeline": 1,
     "bandwidth": "1.70GB",
     "reconnects": 0,
-    "status_2xx": 380294,
+    "status_2xx": 380300,
     "status_3xx": 0,
     "status_4xx": 0,
     "status_5xx": 0

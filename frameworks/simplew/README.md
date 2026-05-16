@@ -1,6 +1,6 @@
 # SimpleW
 
-SimpleW is Web server Library in .NET Core. Powerfully Simple and Blazingly Fast.
+SimpleW is Modern Web Server for .NET. Designed for Simplicity. Built for Speed.
 
 ## Stack
 

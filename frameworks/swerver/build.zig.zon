@@ -1,6 +1,6 @@
 .{
     .name = .swerver_httparena,
-    .version = "0.1.0-alpha.2",
+    .version = "0.1.0-alpha.6",
     .fingerprint = 0xd44040f91e2c7045,
     .minimum_zig_version = "0.16.0",
     .paths = .{
@@ -10,7 +10,8 @@
     },
     .dependencies = .{
         .swerver = .{
-            .path = "..",
+            .url = "https://github.com/justinGrosvenor/swerver/archive/refs/tags/v0.1.0-alpha.6.tar.gz",
+            .hash = "swerver-0.1.0-alpha.1-nQSRj24ZGABx-fUmkKJ97g4jTqDFvdgcmquXnD6EQIDo",
         },
     },
 }

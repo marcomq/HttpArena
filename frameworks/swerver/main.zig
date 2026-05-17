@@ -93,13 +93,27 @@ fn handleEchoGet(_: *router.HandlerContext) response_mod.Response {
 }
 
 fn handleEchoPost(ctx: *router.HandlerContext) response_mod.Response {
-    if (ctx.request.body.len == 0) return handleEchoGet(ctx);
+    if (ctx.request.body.len() == 0) return handleEchoGet(ctx);
+    const body_slice = ctx.request.body.sliceOrNull() orelse {
+        const buf = ctx.request.body.copyTo(ctx.response_buf) orelse return .{
+            .status = 413,
+            .headers = &[_]response_mod.Header{},
+            .body = .{ .bytes = "Body too large to echo" },
+        };
+        return .{
+            .status = 200,
+            .headers = &[_]response_mod.Header{
+                .{ .name = "Content-Type", .value = "application/json" },
+            },
+            .body = .{ .bytes = buf },
+        };
+    };
     return .{
         .status = 200,
         .headers = &[_]response_mod.Header{
             .{ .name = "Content-Type", .value = "application/json" },
         },
-        .body = .{ .bytes = ctx.request.body },
+        .body = .{ .bytes = body_slice },
     };
 }
 
@@ -134,8 +148,9 @@ fn handleBaseline(ctx: *router.HandlerContext) response_mod.Response {
             }
         }
     }
-    if (ctx.request.method == .POST and ctx.request.body.len > 0) {
-        const trimmed = std.mem.trim(u8, ctx.request.body, " \t\r\n");
+    if (ctx.request.method == .POST and ctx.request.body.len() > 0) {
+        const body_bytes = ctx.request.body.sliceOrNull() orelse "";
+        const trimmed = std.mem.trim(u8, body_bytes, " \t\r\n");
         sum += std.fmt.parseInt(i64, trimmed, 10) catch 0;
     }
     const body = std.fmt.bufPrint(ctx.response_buf, "{d}", .{sum}) catch "0";
@@ -149,7 +164,7 @@ fn handleBaseline(ctx: *router.HandlerContext) response_mod.Response {
 }
 
 fn handleUpload(ctx: *router.HandlerContext) response_mod.Response {
-    const body = std.fmt.bufPrint(ctx.response_buf, "{d}", .{ctx.request.body.len}) catch "0";
+    const body = std.fmt.bufPrint(ctx.response_buf, "{d}", .{ctx.request.body.len()}) catch "0";
     return .{
         .status = 200,
         .headers = &[_]response_mod.Header{

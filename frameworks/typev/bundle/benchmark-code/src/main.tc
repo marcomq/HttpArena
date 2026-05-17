@@ -194,7 +194,7 @@ fn accept_loop() -> void {
 fn main() -> uint {
     println("typev HttpArena server listening on :8080")
 
-    foreach i in 0, 31, 1 {
+    foreach i in 0, 3, 1 {
         spawn accept_loop()
     }
 

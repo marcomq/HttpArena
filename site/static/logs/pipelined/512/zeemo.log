@@ -1,8 +1,8 @@
 info: loaded 50 dataset items
 info: spawning 64 worker(s) across cpus
 info: worker 1 listening on :8080
-info: worker 2 listening on :8080
 info: worker 3 listening on :8080
+info: worker 2 listening on :8080
 info: worker 4 listening on :8080
 info: worker 5 listening on :8080
 info: worker 6 listening on :8080

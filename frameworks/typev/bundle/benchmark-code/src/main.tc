@@ -10,6 +10,8 @@ from std.socket import tcp_listen, tcp_accept, tcp_read, tcp_write, tcp_close
 from http import parseRequest, newReq, newChunk
 from response import writePipeline, writeBaseline, PIPE_BATCH, PIPE_BATCH_N, RESP_LEN
 from dataset import writeJson
+from assets import serveStatic
+from ws import wsHandshake, wsServe, wsReject
 
 // Per-connection receive / output buffer capacities.
 let const BUFCAP: uint = 65536u
@@ -56,6 +58,43 @@ fn blastPipe(fd: int, scratch: byte[], total: uint) -> bool {
         scratch[k] = PIPE_BATCH[sent + k]
     }
     return writeAll(fd, scratch, rest)
+}
+
+// Stream-drain a Content-Length upload body: `cl` total body bytes, some of
+// which already sit in buf[bodyStart..curLen). Reads the rest 64KB at a time
+// (never buffering the whole body) and leaves any trailing next-request bytes
+// at buf[0..]. Returns (leftover length, false on socket error).
+fn drainUpload(fd: int, buf: byte[], bufcap: uint, bodyStart: uint, cl: uint, curLen: uint) -> (uint, bool) {
+    let inBuf: uint = curLen - bodyStart
+    if inBuf >= cl {
+        let tail: uint = inBuf - cl
+        foreach k: uint in 0u, tail {
+            buf[k] = buf[bodyStart + cl + k]
+        }
+        return (tail, true)
+    }
+    let need: uint = cl - inBuf
+    let tail: uint = 0u
+    let ok: bool = true
+    while need > 0u {
+        let got = tcp_read(fd, buf, bufcap)
+        if got <= 0 {
+            ok = false
+            need = 0u
+        } else {
+            let g: uint = got as uint
+            if g <= need {
+                need = need - g
+            } else {
+                tail = g - need
+                foreach k: uint in 0u, tail {
+                    buf[k] = buf[need + k]
+                }
+                need = 0u
+            }
+        }
+    }
+    return (tail, ok)
 }
 
 // Serve one connection.
@@ -133,7 +172,51 @@ fn handle_client(fd: int) -> void {
                             }
                             opos = 0u
                         }
-                        if req.isJson {
+                        if req.isStatic {
+                            // static responses stream directly — flush any
+                            // batched output first, then serve the asset
+                            if opos > 0u {
+                                if !writeAll(fd, obuf, opos) {
+                                    running = false
+                                }
+                                opos = 0u
+                            }
+                            if !serveStatic(fd, buf, req.pathStart, req.pathEnd, req.acceptBr, req.acceptGzip, req.keepAlive, obuf, OBUFCAP) {
+                                running = false
+                                parsing = false
+                            }
+                        } else if req.isUpload {
+                            // stream-drain the body, then ack the byte count
+                            let cl: uint = if req.contentLen > 0 => (req.contentLen as uint) else 0u
+                            let (newLen, ok) = drainUpload(fd, buf, BUFCAP, req.bodyStart, cl, len)
+                            len = newLen
+                            if ok {
+                                opos = writeBaseline(obuf, opos, cl as int, req.keepAlive)
+                            } else {
+                                running = false
+                                parsing = false
+                            }
+                        } else if req.isWs {
+                            // WebSocket: 101 handshake, then echo frames until
+                            // the peer closes. wsServe owns the connection.
+                            if opos > 0u {
+                                if !writeAll(fd, obuf, opos) {
+                                    running = false
+                                }
+                                opos = 0u
+                            }
+                            if running {
+                                if req.wsKeyEnd > req.wsKeyStart {
+                                    if wsHandshake(fd, buf, req.wsKeyStart, req.wsKeyEnd, obuf) {
+                                        wsServe(fd, buf, tmp, obuf, BUFCAP, OBUFCAP, req.consumed, len - req.consumed)
+                                    }
+                                } else {
+                                    wsReject(fd, obuf)
+                                }
+                            }
+                            running = false
+                            parsing = false
+                        } else if req.isJson {
                             opos = writeJson(obuf, opos, req.jcount, req.jmult, req.keepAlive)
                         } else if req.isBaseline {
                             opos = writeBaseline(obuf, opos, req.result, req.keepAlive)

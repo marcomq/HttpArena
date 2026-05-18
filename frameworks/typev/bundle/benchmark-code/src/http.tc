@@ -8,11 +8,22 @@ type Req = struct {
     isPipeline: bool,
     isBaseline: bool,
     isJson: bool,
+    isStatic: bool,
+    isUpload: bool,
     isPost: bool,
     keepAlive: bool,
     result: int,
     jcount: int,
-    jmult: int
+    jmult: int,
+    pathStart: uint,
+    pathEnd: uint,
+    acceptBr: bool,
+    acceptGzip: bool,
+    contentLen: int,
+    bodyStart: uint,
+    isWs: bool,
+    wsKeyStart: uint,
+    wsKeyEnd: uint
 }
 
 // Result of decoding a chunked body.
@@ -24,7 +35,7 @@ type Chunk = struct {
 
 // Allocate one Req / Chunk — a handler makes these once and reuses them.
 fn newReq() -> Req {
-    let r: Req = {complete: false, consumed: 0u, isPipeline: false, isBaseline: false, isJson: false, isPost: false, keepAlive: true, result: 0, jcount: 0, jmult: 0}
+    let r: Req = {complete: false, consumed: 0u, isPipeline: false, isBaseline: false, isJson: false, isStatic: false, isUpload: false, isPost: false, keepAlive: true, result: 0, jcount: 0, jmult: 0, pathStart: 0u, pathEnd: 0u, acceptBr: false, acceptGzip: false, contentLen: 0, bodyStart: 0u, isWs: false, wsKeyStart: 0u, wsKeyEnd: 0u}
     return r
 }
 
@@ -39,6 +50,10 @@ let local const HDR_TRANSFER_ENCODING: byte[] = "transfer-encoding".bytes()
 let local const HDR_CONNECTION: byte[] = "connection".bytes()
 let local const VAL_CHUNKED: byte[] = "chunked".bytes()
 let local const VAL_CLOSE: byte[] = "close".bytes()
+let local const HDR_ACCEPT_ENCODING: byte[] = "accept-encoding".bytes()
+let local const VAL_BR: byte[] = "br".bytes()
+let local const VAL_GZIP: byte[] = "gzip".bytes()
+let local const HDR_WS_KEY: byte[] = "sec-websocket-key".bytes()
 
 // Parse a decimal integer from buf[start..end), ignoring non-digit bytes.
 local fn parseDigits(buf: byte[], start: uint, end: uint) -> int {
@@ -185,11 +200,22 @@ fn parseRequest(buf: byte[], len: uint, mut r: Req, mut c: Chunk) -> void {
     r.isPipeline = false
     r.isBaseline = false
     r.isJson = false
+    r.isStatic = false
+    r.isUpload = false
     r.isPost = false
     r.keepAlive = true
     r.result = 0
     r.jcount = 0
     r.jmult = 0
+    r.pathStart = 0u
+    r.pathEnd = 0u
+    r.acceptBr = false
+    r.acceptGzip = false
+    r.contentLen = 0
+    r.bodyStart = 0u
+    r.isWs = false
+    r.wsKeyStart = 0u
+    r.wsKeyEnd = 0u
     if len < 4u {
         return
     }
@@ -224,6 +250,17 @@ fn parseRequest(buf: byte[], len: uint, mut r: Req, mut c: Chunk) -> void {
     r.isPipeline = rc == 112
     r.isBaseline = rc == 98
     r.isJson = rc == 106
+    r.isStatic = rc == 115
+    r.isUpload = rc == 117
+    r.isWs = rc == 119
+
+    // request target = buf[pathStart .. pathEnd) — up to the next space
+    let pathEnd: uint = pathStart
+    while pathEnd < he && (buf[pathEnd] as int) != 32 {
+        pathEnd = pathEnd + 1u
+    }
+    r.pathStart = pathStart
+    r.pathEnd = pathEnd
 
     // end of request line (first CR)
     let lineEnd: uint = pathStart
@@ -250,8 +287,32 @@ fn parseRequest(buf: byte[], len: uint, mut r: Req, mut c: Chunk) -> void {
             if containsCI(buf, h, le, VAL_CLOSE) {
                 r.keepAlive = false
             }
+        } else if matchHeader(buf, h, le, HDR_ACCEPT_ENCODING) {
+            if containsCI(buf, h, le, VAL_BR) {
+                r.acceptBr = true
+            }
+            if containsCI(buf, h, le, VAL_GZIP) {
+                r.acceptGzip = true
+            }
+        } else if matchHeader(buf, h, le, HDR_WS_KEY) {
+            let vs: uint = h + HDR_WS_KEY.length + 1u
+            while vs < le && (buf[vs] as int) == 32 {
+                vs = vs + 1u
+            }
+            r.wsKeyStart = vs
+            r.wsKeyEnd = le
         }
         h = le + 2u
+    }
+
+    // upload: parsed headers are enough — handle_client streams the body
+    // (Content-Length framed; the benchmark never chunk-encodes uploads).
+    if r.isUpload {
+        r.complete = true
+        r.consumed = 0u
+        r.bodyStart = bodyStart
+        r.contentLen = contentLen
+        return
     }
 
     // body

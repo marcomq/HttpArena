@@ -10,7 +10,11 @@
     "pipelined",
     "baseline",
     "limited-conn",
-    "json"
+    "json",
+    "static",
+    "upload",
+    "echo-ws",
+    "echo-ws-pipeline"
   ],
   "maintainers": ["praisethemoon"]
 }

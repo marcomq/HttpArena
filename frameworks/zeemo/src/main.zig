@@ -8,10 +8,19 @@ const handlers = @import("handlers.zig");
 const dataset = @import("dataset.zig");
 
 const PORT: u16 = 8080;
-const MAX_CONN = 1024;
+/// Per-worker connection cap. The bench distributes 4096 connections across
+/// N workers via SO_REUSEPORT (4-tuple hash), so per-worker mean is ≤ 64
+/// with σ ≈ 8. 128 gives a healthy margin and roughly 4× less BSS than the
+/// previous 1024 — the memory bonus in HttpArena's composite uses
+/// `sqrt(rps)/memMB`, so even when rps stays flat the lower RSS bumps the score.
+const MAX_CONN = 128;
 const RING_ENTRIES = 4096;
 const LISTEN_BACKLOG: u32 = 1024;
 const WRITE_BUF_SIZE = 16 * 1024;
+/// When `write_buf` accumulates more than this in a single drain pass we
+/// flush before dispatching another request, leaving headroom for one
+/// max-sized JSON response (~10.5 KiB).
+const WRITE_FLUSH_AT: u32 = WRITE_BUF_SIZE - 12 * 1024;
 
 const Op = enum(u8) {
     accept = 1,
@@ -238,28 +247,7 @@ fn handleRecv(ring: *IoUring, cqe: *linux.io_uring_cqe) !void {
         _ = try ring.close(ud(.close, slot_idx), slot.fd);
         return;
     }
-    const n: u32 = @intCast(cqe.res);
-    switch (slot.parser.feed(n)) {
-        .need_more => {
-            const buf = slot.parser.recv_slot();
-            if (buf.len == 0) {
-                // Buffer full but parser still wants more — close.
-                _ = try ring.close(ud(.close, slot_idx), slot.fd);
-                return;
-            }
-            _ = try ring.recv(ud(.recv, slot_idx), slot.fd, .{ .buffer = buf }, 0);
-        },
-        .protocol_error => {
-            _ = try ring.close(ud(.close, slot_idx), slot.fd);
-        },
-        .ready => |req| {
-            const resp = handlers.handle(req, &ds, &slot.write_buf);
-            slot.write_len = @intCast(resp.bytes.len);
-            slot.write_off = 0;
-            slot.close_after_send = resp.close;
-            _ = try ring.send(ud(.send, slot_idx), slot.fd, resp.bytes, linux.MSG.NOSIGNAL);
-        },
-    }
+    try drainAndSend(ring, slot_idx, @intCast(cqe.res));
 }
 
 fn handleSend(ring: *IoUring, cqe: *linux.io_uring_cqe) !void {
@@ -272,11 +260,7 @@ fn handleSend(ring: *IoUring, cqe: *linux.io_uring_cqe) !void {
     const n: u32 = @intCast(cqe.res);
     slot.write_off += n;
     if (slot.write_off < slot.write_len) {
-        // Partial send — submit a fresh send for the unsent tail. We track
-        // slot.write_len as the absolute byte count of the rendered response
-        // starting at write_buf[write_send_start]; for the MVP handlers
-        // always render starting at offset 0 within slot.write_buf so the
-        // remainder lives at [write_off..write_len].
+        // Partial send — submit a fresh send for the unsent tail.
         const remaining = slot.write_buf[slot.write_off..slot.write_len];
         _ = try ring.send(ud(.send, slot_idx), slot.fd, remaining, linux.MSG.NOSIGNAL);
         return;
@@ -285,10 +269,73 @@ fn handleSend(ring: *IoUring, cqe: *linux.io_uring_cqe) !void {
         _ = try ring.close(ud(.close, slot_idx), slot.fd);
         return;
     }
-    // Keep-alive: shift pipelined leftover to front of recv buffer and arm
-    // recv for the next request.
-    const next_offset = slot.parser.consumed();
-    slot.parser.reset(next_offset);
-    const buf = slot.parser.recv_slot();
-    _ = try ring.recv(ud(.recv, slot_idx), slot.fd, .{ .buffer = buf }, 0);
+    // Keep-alive: drain any further pipelined requests already buffered.
+    try drainAndSend(ring, slot_idx, 0);
+}
+
+/// Drain as many complete requests as fit in `write_buf`, then submit one
+/// send for the whole batch. If no requests are ready, arm a recv instead.
+/// `initial_feed_n` is the byte count just delivered by recv (0 when called
+/// from handleSend completion).
+///
+/// HTTP/1.1 pipelining sends N requests back-to-back without waiting for
+/// responses, so the first recv often delivers more than one full request.
+/// Without this drain loop the previous main.zig would dispatch only the
+/// first, submit recv, and block — by then the client is already waiting
+/// for responses 2..N and we'd deadlock until the recv timeout. Batching
+/// also amortizes one send syscall across the whole burst.
+fn drainAndSend(ring: *IoUring, slot_idx: u32, initial_feed_n: u32) !void {
+    const slot = &slots[slot_idx];
+    var write_pos: u32 = 0;
+    var feed_n = initial_feed_n;
+
+    while (true) {
+        const result = slot.parser.feed(feed_n);
+        feed_n = 0;
+        switch (result) {
+            .protocol_error => {
+                if (write_pos > 0) {
+                    try submitSend(ring, slot_idx, write_pos, true);
+                } else {
+                    _ = try ring.close(ud(.close, slot_idx), slot.fd);
+                }
+                return;
+            },
+            .need_more => {
+                if (write_pos > 0) {
+                    try submitSend(ring, slot_idx, write_pos, false);
+                    return;
+                }
+                const buf = slot.parser.recv_slot();
+                if (buf.len == 0) {
+                    _ = try ring.close(ud(.close, slot_idx), slot.fd);
+                    return;
+                }
+                _ = try ring.recv(ud(.recv, slot_idx), slot.fd, .{ .buffer = buf }, 0);
+                return;
+            },
+            .ready => |req| {
+                const resp = handlers.handle(req, &ds, slot.write_buf[write_pos..]);
+                write_pos += @intCast(resp.bytes.len);
+                slot.parser.reset(slot.parser.consumed());
+                if (resp.close) {
+                    try submitSend(ring, slot_idx, write_pos, true);
+                    return;
+                }
+                if (write_pos > WRITE_FLUSH_AT) {
+                    try submitSend(ring, slot_idx, write_pos, false);
+                    return;
+                }
+                // Loop: feed(0) to see if the next pipelined request is here.
+            },
+        }
+    }
+}
+
+fn submitSend(ring: *IoUring, slot_idx: u32, len: u32, close_after: bool) !void {
+    const slot = &slots[slot_idx];
+    slot.write_len = len;
+    slot.write_off = 0;
+    slot.close_after_send = close_after;
+    _ = try ring.send(ud(.send, slot_idx), slot.fd, slot.write_buf[0..len], linux.MSG.NOSIGNAL);
 }

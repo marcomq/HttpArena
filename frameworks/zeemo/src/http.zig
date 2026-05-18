@@ -353,6 +353,26 @@ test "POST baseline11 chunked" {
     try std.testing.expectEqualStrings("20", r.ready.body);
 }
 
+test "two pipelined requests in one recv" {
+    var p: Parser = .{};
+    const data = "GET /a HTTP/1.1\r\nHost: x\r\n\r\nGET /b HTTP/1.1\r\nHost: x\r\n\r\n";
+    @memcpy(p.recv_slot()[0..data.len], data);
+    const r1 = p.feed(@intCast(data.len));
+    try std.testing.expect(r1 == .ready);
+    try std.testing.expectEqualStrings("/a", r1.ready.path);
+
+    // After dispatching the first, caller resets at parser.consumed() and
+    // re-feeds zero bytes — the second request must already be ready.
+    p.reset(p.consumed());
+    try std.testing.expect(p.len > 0);
+    const r2 = p.feed(0);
+    try std.testing.expect(r2 == .ready);
+    try std.testing.expectEqualStrings("/b", r2.ready.path);
+
+    p.reset(p.consumed());
+    try std.testing.expectEqual(@as(u32, 0), p.len);
+}
+
 test "split request line" {
     var p: Parser = .{};
     const part1 = "GET /baseli";

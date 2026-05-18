@@ -8,6 +8,8 @@
   "enabled": true,
   "tests": [
     "baseline",
+    "pipelined",
+    "limited-conn",
     "json"
   ],
   "maintainers": []

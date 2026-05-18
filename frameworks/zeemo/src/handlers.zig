@@ -12,11 +12,23 @@ pub const Response = struct {
 pub fn handle(req: http.Request, ds: *const dataset.Dataset, out: []u8) Response {
     if (matchPath(req.path, "/baseline11"))
         return baseline11(req, out);
+    if (matchPath(req.path, "/pipeline"))
+        return pipelineHandler(req, out);
     if (matchJsonPath(req.path)) |count| {
         const m = parseMultiplier(req.query);
         return jsonHandler(count, m, ds, out);
     }
     return notFound(out, req.close);
+}
+
+fn pipelineHandler(req: http.Request, out: []u8) Response {
+    const close_hdr: []const u8 = if (req.close) "Connection: close\r\n" else "";
+    const n = std.fmt.bufPrint(
+        out,
+        "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 2\r\n{s}\r\nok",
+        .{close_hdr},
+    ) catch unreachable;
+    return .{ .bytes = n, .close = req.close };
 }
 
 fn matchPath(path: []const u8, p: []const u8) bool {
@@ -87,13 +99,21 @@ fn parseIntLoose(s: []const u8) i64 {
 }
 
 fn jsonHandler(count: u8, m: u64, ds: *const dataset.Dataset, out: []u8) Response {
-    // Reserve a fixed prefix for headers so we render the body in place and
-    // then patch in Content-Length. Headers are written last after we know
-    // the body byte count.
-    const headers_reserve: usize = 128;
-    const body_start = headers_reserve;
-    var pos = body_start;
+    // Fixed-length header prefix: Content-Length is reserved at a known
+    // offset and padded to 5 digits with leading zeros after we know the
+    // body size. Leading zeros are RFC-compliant and let every response
+    // start at out[0], which lets drainAndSend batch them contiguously
+    // without a memmove.
+    const HDR_PREFIX = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: ";
+    const CL_DIGITS = 5;
+    const HDR_TAIL = "\r\n\r\n";
+    const HEADERS_LEN = HDR_PREFIX.len + CL_DIGITS + HDR_TAIL.len;
+    const CL_OFFSET = HDR_PREFIX.len;
 
+    @memcpy(out[0..HDR_PREFIX.len], HDR_PREFIX);
+    @memcpy(out[CL_OFFSET + CL_DIGITS ..][0..HDR_TAIL.len], HDR_TAIL);
+
+    var pos: usize = HEADERS_LEN;
     pos = appendStr(out, pos, "{\"items\":[");
     var i: usize = 0;
     while (i < count) : (i += 1) {
@@ -114,16 +134,12 @@ fn jsonHandler(count: u8, m: u64, ds: *const dataset.Dataset, out: []u8) Respons
     out[pos] = '}';
     pos += 1;
 
-    const body_len = pos - body_start;
+    const body_len = pos - HEADERS_LEN;
+    var cl_buf: [CL_DIGITS]u8 = undefined;
+    _ = std.fmt.bufPrint(&cl_buf, "{d:0>5}", .{body_len}) catch unreachable;
+    @memcpy(out[CL_OFFSET..][0..CL_DIGITS], &cl_buf);
 
-    // Now write headers backwards from body_start.
-    var hdr_buf: [128]u8 = undefined;
-    const hdr = std.fmt.bufPrint(&hdr_buf,
-        "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {d}\r\n\r\n",
-        .{body_len}) catch unreachable;
-    const start = body_start - hdr.len;
-    @memcpy(out[start..body_start], hdr);
-    return .{ .bytes = out[start..pos], .close = false };
+    return .{ .bytes = out[0..pos], .close = false };
 }
 
 fn notFound(out: []u8, close: bool) Response {

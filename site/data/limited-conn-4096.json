@@ -1322,5 +1322,25 @@
     "status_3xx": 0,
     "status_4xx": 0,
     "status_5xx": 0
+  },
+  {
+    "framework": "zeemo",
+    "language": "Zig",
+    "rps": 2606729,
+    "avg_latency": "1.42ms",
+    "p99_latency": "1.98ms",
+    "cpu": "5592.4%",
+    "memory": "254MiB",
+    "connections": 4096,
+    "threads": 64,
+    "duration": "5s",
+    "pipeline": 1,
+    "bandwidth": "164.01MB/s",
+    "input_bw": "201.36MB/s",
+    "reconnects": 1302981,
+    "status_2xx": 13033649,
+    "status_3xx": 0,
+    "status_4xx": 0,
+    "status_5xx": 0
   }
 ]

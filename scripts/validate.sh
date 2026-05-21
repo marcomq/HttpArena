@@ -163,6 +163,43 @@ if has_test "async-db" || has_test "crud" || has_test "api-4" || has_test "api-1
     docker_args+=(-e "DATABASE_MAX_CONN=256")
 fi
 
+# Start Redis sidecar if needed
+if has_test "crud"; then
+
+    REDIS_CONTAINER="httparena-redis"
+    REDIS_URL="redis://localhost:6379"
+    REDIS_CPUSET="${REDIS_CPUSET:-0,64}"
+
+    echo "[redis] Starting Redis sidecar (cpuset=$REDIS_CPUSET)"
+    docker rm -f "$REDIS_CONTAINER" 2>/dev/null || true
+    docker run -d --rm --name "$REDIS_CONTAINER" --network host \
+        --cpuset-cpus="$REDIS_CPUSET" \
+        --ulimit memlock=-1:-1 \
+        --ulimit nofile=1048576:1048576 \
+        redis:7-alpine \
+        redis-server \
+            --protected-mode no \
+            --bind 0.0.0.0 \
+            --port 6379 \
+            --save "" \
+            --appendonly no \
+            --maxmemory 512mb \
+            --maxmemory-policy allkeys-lru \
+            --io-threads 1 \
+            >/dev/null
+
+    # Wait for PING to succeed.
+    for i in $(seq 1 30); do
+        if docker exec "$REDIS_CONTAINER" redis-cli ping 2>/dev/null | grep -q PONG; then
+            echo "[redis] Ready"
+            break
+        fi
+        [ "$i" -eq 30 ] && { echo "FAIL: Redis sidecar not ready"; exit 1; }
+        sleep 1
+    done
+    docker_args+=(-e "REDIS_URL=$REDIS_URL")
+fi
+
 # Start container (skip for gateway-only — compose handles it later)
 if [ "$GATEWAY_ONLY" = "false" ]; then
     docker rm -f "$CONTAINER_NAME" 2>/dev/null || true

@@ -156,6 +156,25 @@
     "status_5xx": 0
   },
   {
+    "framework": "roadrunner",
+    "language": "Erlang",
+    "rps": 56956,
+    "avg_latency": "70.99ms",
+    "p99_latency": "97.46ms",
+    "cpu": "5837.1%",
+    "memory": "1.0GiB",
+    "connections": 64,
+    "threads": 64,
+    "duration": "5s",
+    "pipeline": 1,
+    "bandwidth": "3.86MB/s",
+    "reconnects": 0,
+    "status_2xx": 285353,
+    "status_3xx": 0,
+    "status_4xx": 0,
+    "status_5xx": 0
+  },
+  {
     "framework": "swerver",
     "language": "Zig",
     "rps": 872911,

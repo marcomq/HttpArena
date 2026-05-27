@@ -464,7 +464,7 @@
   },
   "roadrunner": {
     "dir": "roadrunner",
-    "description": "Roadrunner: pure-Erlang HTTP/1.1 + HTTP/2 + WebSocket server from the Arizona framework.",
+    "description": "Roadrunner: pure-Erlang HTTP/1.1 + HTTP/2 + HTTP/3 + WebSocket server from the Arizona framework.",
     "repo": "https://github.com/arizona-framework/roadrunner",
     "type": "production",
     "engine": "roadrunner"

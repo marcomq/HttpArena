@@ -1,9 +1,9 @@
 Exec: /app/erts-17.0/bin/erlexec -noinput +Bd -boot /app/releases/0.1.0/start -mode embedded -boot_var SYSTEM_LIB_DIR /app/lib -config /app/releases/0.1.0/sys.config -args_file /app/releases/0.1.0/vm.args -- foreground
 Root: /app
 /app
-=ESOCK WARNING MSG==== 18-May-2026::11:30:09.737871 ===
+=ESOCK WARNING MSG==== 27-May-2026::22:58:37.692530 ===
 [UNIX-ESSIO] Failed open sctp dynamic library: libsctp.so.1
-=ERROR REPORT==== 18-May-2026::11:30:15.692033 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.650692 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -24,7 +24,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.692052 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.650728 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -45,7 +45,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.692093 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.650718 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -66,7 +66,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.692091 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.652703 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -87,7 +87,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.692089 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.652738 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -108,7 +108,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.692073 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.652760 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -129,7 +129,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.692117 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.652733 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -150,7 +150,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.692136 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.652764 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -171,7 +171,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.692120 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.652798 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -192,7 +192,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.692154 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.652799 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -213,7 +213,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.692181 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.652873 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -234,7 +234,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.692257 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.652802 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -255,7 +255,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.692223 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.652884 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -276,7 +276,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.692208 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.652842 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -297,7 +297,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.692252 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.652823 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -318,7 +318,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.692225 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.652850 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -339,7 +339,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.692289 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.652877 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -360,7 +360,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.692287 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.652909 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -381,7 +381,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.692291 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.652914 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -402,7 +402,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.693009 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.652922 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -423,7 +423,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.693039 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.652950 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -444,7 +444,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.693049 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.652964 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -465,7 +465,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.692996 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.652996 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -486,7 +486,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.693046 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.653015 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -507,7 +507,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.693079 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.652993 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -528,7 +528,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.693074 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.653052 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -549,7 +549,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.693136 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.653015 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -570,7 +570,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.693157 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.653081 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -591,7 +591,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.693166 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.653051 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -612,7 +612,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.693144 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.653109 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -633,7 +633,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.693173 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.653103 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -654,7 +654,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.693157 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.653077 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -675,7 +675,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.693201 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.653118 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -696,7 +696,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.693151 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.654626 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -717,7 +717,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.693161 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.654705 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -738,7 +738,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.693236 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.654711 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -759,7 +759,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.693193 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.654703 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -780,7 +780,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.693236 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.654714 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -801,7 +801,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.695994 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.654711 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -822,7 +822,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.695989 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.654727 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -843,7 +843,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.696050 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.654752 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -864,7 +864,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.696033 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.654766 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -885,7 +885,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.696020 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.654764 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -906,7 +906,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:15.696030 ===
+=ERROR REPORT==== 27-May-2026::22:58:43.654788 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -927,7 +927,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.062019 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.029725 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -948,7 +948,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.062052 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.029682 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -969,7 +969,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.062030 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.029752 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -990,7 +990,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.062055 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.029739 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1011,7 +1011,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.062066 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.029788 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1032,7 +1032,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.062090 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.029712 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1053,7 +1053,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.062089 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.029847 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1074,7 +1074,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.062148 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.029829 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1095,7 +1095,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.062055 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.029774 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1116,7 +1116,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.062143 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.029787 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1137,7 +1137,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.062132 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.029892 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1158,7 +1158,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.062107 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.029838 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1179,7 +1179,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.062165 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.029819 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1200,7 +1200,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.062208 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.029923 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1221,7 +1221,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.062217 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.029861 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1242,7 +1242,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.062198 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.029887 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1263,7 +1263,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.062238 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.029901 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1284,7 +1284,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.062235 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.029985 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1305,7 +1305,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.062218 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.030000 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1326,7 +1326,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.064040 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.029963 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1347,7 +1347,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.064058 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.030046 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1368,7 +1368,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.064018 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.030107 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1389,7 +1389,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.064082 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.030083 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1410,7 +1410,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.064097 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.029973 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1431,7 +1431,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.064070 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.029948 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1452,7 +1452,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.064124 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.030019 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1473,7 +1473,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.064114 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.029998 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1494,7 +1494,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.064165 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.030134 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1515,7 +1515,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.064177 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.030014 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1536,7 +1536,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.064151 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.030064 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1557,7 +1557,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.064198 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.030105 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1578,7 +1578,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.064248 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.030085 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1599,7 +1599,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.064298 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.031691 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1620,7 +1620,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.064215 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.031700 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1641,7 +1641,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.064215 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.031751 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1662,7 +1662,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.064264 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.031729 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1683,7 +1683,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.064237 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.031729 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1704,7 +1704,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.064281 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.031743 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1725,7 +1725,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.064362 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.031771 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1746,7 +1746,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.064336 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.031798 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1767,7 +1767,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.064373 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.031841 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1788,7 +1788,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.064319 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.031801 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1809,7 +1809,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.064357 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.031835 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1830,7 +1830,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.066017 ===
+=ERROR REPORT==== 27-May-2026::22:58:51.031827 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1851,7 +1851,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:23.066048 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.419716 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1872,7 +1872,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432077 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.419735 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1893,7 +1893,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432117 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.419695 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1914,7 +1914,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432068 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.419771 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1935,7 +1935,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432030 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.419787 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1956,7 +1956,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432090 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.419781 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1977,7 +1977,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432184 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.419828 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -1998,7 +1998,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432083 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.419833 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2019,7 +2019,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432117 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.419807 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2040,7 +2040,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432127 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.419868 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2061,7 +2061,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432145 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.419902 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2082,7 +2082,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432090 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.419886 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2103,7 +2103,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432178 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.419900 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2124,7 +2124,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432185 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420015 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2145,7 +2145,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432157 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.419955 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2166,7 +2166,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432250 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.419971 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2187,7 +2187,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432221 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.419978 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2208,7 +2208,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432239 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.419984 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2229,7 +2229,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432243 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420004 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2250,7 +2250,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432323 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420069 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2271,7 +2271,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432288 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420034 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2292,7 +2292,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432355 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420057 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2313,7 +2313,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432305 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420105 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2334,7 +2334,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432280 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420089 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2355,7 +2355,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432319 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420160 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2376,7 +2376,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432315 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420130 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2397,7 +2397,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.432299 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420213 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2418,7 +2418,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.433996 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420152 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2439,7 +2439,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.434011 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420198 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2460,7 +2460,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.434004 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420175 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2481,7 +2481,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.434048 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420239 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2502,7 +2502,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.434027 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420268 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2523,7 +2523,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.434082 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420277 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2544,7 +2544,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.434130 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420335 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2565,7 +2565,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.434070 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420351 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2586,7 +2586,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.434110 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420305 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2607,7 +2607,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.434077 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420344 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2628,7 +2628,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.434076 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420362 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2649,7 +2649,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.434175 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420372 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2670,7 +2670,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.434152 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420400 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2691,7 +2691,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.434159 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420449 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2712,7 +2712,7 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.434165 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420472 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler
@@ -2733,7 +2733,385 @@ Root: /app
                  {proc_lib,init_p_do_apply,3,
                      [{file,"proc_lib.erl"},{line,333}]}]
     class: error
-=ERROR REPORT==== 18-May-2026::11:30:30.434145 ===
+=ERROR REPORT==== 27-May-2026::22:58:58.420418 ===
+    reason: {case_clause,{error,closed}}
+    msg: roadrunner handler crashed
+    handler: roadrunner_httparena_handler
+    stacktrace: [{roadrunner_httparena_handler,consume_body,2,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,75}]},
+                 {roadrunner_httparena_handler,upload_endpoint,1,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,65}]},
+                 {roadrunner_compress,call,2,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_compress.erl"},
+                      {line,76}]},
+                 {roadrunner_conn_loop,run_pipeline,4,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_conn_loop.erl"},
+                      {line,576}]},
+                 {proc_lib,init_p_do_apply,3,
+                     [{file,"proc_lib.erl"},{line,333}]}]
+    class: error
+=ERROR REPORT==== 27-May-2026::22:58:58.420447 ===
+    reason: {case_clause,{error,closed}}
+    msg: roadrunner handler crashed
+    handler: roadrunner_httparena_handler
+    stacktrace: [{roadrunner_httparena_handler,consume_body,2,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,75}]},
+                 {roadrunner_httparena_handler,upload_endpoint,1,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,65}]},
+                 {roadrunner_compress,call,2,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_compress.erl"},
+                      {line,76}]},
+                 {roadrunner_conn_loop,run_pipeline,4,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_conn_loop.erl"},
+                      {line,576}]},
+                 {proc_lib,init_p_do_apply,3,
+                     [{file,"proc_lib.erl"},{line,333}]}]
+    class: error
+=ERROR REPORT==== 27-May-2026::22:58:58.420489 ===
+    reason: {case_clause,{error,closed}}
+    msg: roadrunner handler crashed
+    handler: roadrunner_httparena_handler
+    stacktrace: [{roadrunner_httparena_handler,consume_body,2,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,75}]},
+                 {roadrunner_httparena_handler,upload_endpoint,1,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,65}]},
+                 {roadrunner_compress,call,2,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_compress.erl"},
+                      {line,76}]},
+                 {roadrunner_conn_loop,run_pipeline,4,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_conn_loop.erl"},
+                      {line,576}]},
+                 {proc_lib,init_p_do_apply,3,
+                     [{file,"proc_lib.erl"},{line,333}]}]
+    class: error
+=ERROR REPORT==== 27-May-2026::22:58:58.421636 ===
+    reason: {case_clause,{error,closed}}
+    msg: roadrunner handler crashed
+    handler: roadrunner_httparena_handler
+    stacktrace: [{roadrunner_httparena_handler,consume_body,2,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,75}]},
+                 {roadrunner_httparena_handler,upload_endpoint,1,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,65}]},
+                 {roadrunner_compress,call,2,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_compress.erl"},
+                      {line,76}]},
+                 {roadrunner_conn_loop,run_pipeline,4,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_conn_loop.erl"},
+                      {line,576}]},
+                 {proc_lib,init_p_do_apply,3,
+                     [{file,"proc_lib.erl"},{line,333}]}]
+    class: error
+=ERROR REPORT==== 27-May-2026::22:58:58.421666 ===
+    reason: {case_clause,{error,closed}}
+    msg: roadrunner handler crashed
+    handler: roadrunner_httparena_handler
+    stacktrace: [{roadrunner_httparena_handler,consume_body,2,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,75}]},
+                 {roadrunner_httparena_handler,upload_endpoint,1,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,65}]},
+                 {roadrunner_compress,call,2,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_compress.erl"},
+                      {line,76}]},
+                 {roadrunner_conn_loop,run_pipeline,4,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_conn_loop.erl"},
+                      {line,576}]},
+                 {proc_lib,init_p_do_apply,3,
+                     [{file,"proc_lib.erl"},{line,333}]}]
+    class: error
+=ERROR REPORT==== 27-May-2026::22:58:58.421659 ===
+    reason: {case_clause,{error,closed}}
+    msg: roadrunner handler crashed
+    handler: roadrunner_httparena_handler
+    stacktrace: [{roadrunner_httparena_handler,consume_body,2,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,75}]},
+                 {roadrunner_httparena_handler,upload_endpoint,1,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,65}]},
+                 {roadrunner_compress,call,2,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_compress.erl"},
+                      {line,76}]},
+                 {roadrunner_conn_loop,run_pipeline,4,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_conn_loop.erl"},
+                      {line,576}]},
+                 {proc_lib,init_p_do_apply,3,
+                     [{file,"proc_lib.erl"},{line,333}]}]
+    class: error
+=ERROR REPORT==== 27-May-2026::22:58:58.421706 ===
+    reason: {case_clause,{error,closed}}
+    msg: roadrunner handler crashed
+    handler: roadrunner_httparena_handler
+    stacktrace: [{roadrunner_httparena_handler,consume_body,2,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,75}]},
+                 {roadrunner_httparena_handler,upload_endpoint,1,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,65}]},
+                 {roadrunner_compress,call,2,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_compress.erl"},
+                      {line,76}]},
+                 {roadrunner_conn_loop,run_pipeline,4,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_conn_loop.erl"},
+                      {line,576}]},
+                 {proc_lib,init_p_do_apply,3,
+                     [{file,"proc_lib.erl"},{line,333}]}]
+    class: error
+=ERROR REPORT==== 27-May-2026::22:58:58.421726 ===
+    reason: {case_clause,{error,closed}}
+    msg: roadrunner handler crashed
+    handler: roadrunner_httparena_handler
+    stacktrace: [{roadrunner_httparena_handler,consume_body,2,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,75}]},
+                 {roadrunner_httparena_handler,upload_endpoint,1,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,65}]},
+                 {roadrunner_compress,call,2,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_compress.erl"},
+                      {line,76}]},
+                 {roadrunner_conn_loop,run_pipeline,4,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_conn_loop.erl"},
+                      {line,576}]},
+                 {proc_lib,init_p_do_apply,3,
+                     [{file,"proc_lib.erl"},{line,333}]}]
+    class: error
+=ERROR REPORT==== 27-May-2026::22:58:58.421716 ===
+    reason: {case_clause,{error,closed}}
+    msg: roadrunner handler crashed
+    handler: roadrunner_httparena_handler
+    stacktrace: [{roadrunner_httparena_handler,consume_body,2,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,75}]},
+                 {roadrunner_httparena_handler,upload_endpoint,1,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,65}]},
+                 {roadrunner_compress,call,2,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_compress.erl"},
+                      {line,76}]},
+                 {roadrunner_conn_loop,run_pipeline,4,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_conn_loop.erl"},
+                      {line,576}]},
+                 {proc_lib,init_p_do_apply,3,
+                     [{file,"proc_lib.erl"},{line,333}]}]
+    class: error
+=ERROR REPORT==== 27-May-2026::22:58:58.421738 ===
+    reason: {case_clause,{error,closed}}
+    msg: roadrunner handler crashed
+    handler: roadrunner_httparena_handler
+    stacktrace: [{roadrunner_httparena_handler,consume_body,2,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,75}]},
+                 {roadrunner_httparena_handler,upload_endpoint,1,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,65}]},
+                 {roadrunner_compress,call,2,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_compress.erl"},
+                      {line,76}]},
+                 {roadrunner_conn_loop,run_pipeline,4,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_conn_loop.erl"},
+                      {line,576}]},
+                 {proc_lib,init_p_do_apply,3,
+                     [{file,"proc_lib.erl"},{line,333}]}]
+    class: error
+=ERROR REPORT==== 27-May-2026::22:58:58.421800 ===
+    reason: {case_clause,{error,closed}}
+    msg: roadrunner handler crashed
+    handler: roadrunner_httparena_handler
+    stacktrace: [{roadrunner_httparena_handler,consume_body,2,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,75}]},
+                 {roadrunner_httparena_handler,upload_endpoint,1,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,65}]},
+                 {roadrunner_compress,call,2,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_compress.erl"},
+                      {line,76}]},
+                 {roadrunner_conn_loop,run_pipeline,4,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_conn_loop.erl"},
+                      {line,576}]},
+                 {proc_lib,init_p_do_apply,3,
+                     [{file,"proc_lib.erl"},{line,333}]}]
+    class: error
+=ERROR REPORT==== 27-May-2026::22:58:58.421756 ===
+    reason: {case_clause,{error,closed}}
+    msg: roadrunner handler crashed
+    handler: roadrunner_httparena_handler
+    stacktrace: [{roadrunner_httparena_handler,consume_body,2,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,75}]},
+                 {roadrunner_httparena_handler,upload_endpoint,1,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,65}]},
+                 {roadrunner_compress,call,2,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_compress.erl"},
+                      {line,76}]},
+                 {roadrunner_conn_loop,run_pipeline,4,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_conn_loop.erl"},
+                      {line,576}]},
+                 {proc_lib,init_p_do_apply,3,
+                     [{file,"proc_lib.erl"},{line,333}]}]
+    class: error
+=ERROR REPORT==== 27-May-2026::22:58:58.421777 ===
+    reason: {case_clause,{error,closed}}
+    msg: roadrunner handler crashed
+    handler: roadrunner_httparena_handler
+    stacktrace: [{roadrunner_httparena_handler,consume_body,2,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,75}]},
+                 {roadrunner_httparena_handler,upload_endpoint,1,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,65}]},
+                 {roadrunner_compress,call,2,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_compress.erl"},
+                      {line,76}]},
+                 {roadrunner_conn_loop,run_pipeline,4,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_conn_loop.erl"},
+                      {line,576}]},
+                 {proc_lib,init_p_do_apply,3,
+                     [{file,"proc_lib.erl"},{line,333}]}]
+    class: error
+=ERROR REPORT==== 27-May-2026::22:58:58.421804 ===
+    reason: {case_clause,{error,closed}}
+    msg: roadrunner handler crashed
+    handler: roadrunner_httparena_handler
+    stacktrace: [{roadrunner_httparena_handler,consume_body,2,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,75}]},
+                 {roadrunner_httparena_handler,upload_endpoint,1,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,65}]},
+                 {roadrunner_compress,call,2,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_compress.erl"},
+                      {line,76}]},
+                 {roadrunner_conn_loop,run_pipeline,4,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_conn_loop.erl"},
+                      {line,576}]},
+                 {proc_lib,init_p_do_apply,3,
+                     [{file,"proc_lib.erl"},{line,333}]}]
+    class: error
+=ERROR REPORT==== 27-May-2026::22:58:58.421810 ===
+    reason: {case_clause,{error,closed}}
+    msg: roadrunner handler crashed
+    handler: roadrunner_httparena_handler
+    stacktrace: [{roadrunner_httparena_handler,consume_body,2,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,75}]},
+                 {roadrunner_httparena_handler,upload_endpoint,1,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,65}]},
+                 {roadrunner_compress,call,2,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_compress.erl"},
+                      {line,76}]},
+                 {roadrunner_conn_loop,run_pipeline,4,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_conn_loop.erl"},
+                      {line,576}]},
+                 {proc_lib,init_p_do_apply,3,
+                     [{file,"proc_lib.erl"},{line,333}]}]
+    class: error
+=ERROR REPORT==== 27-May-2026::22:58:58.421810 ===
+    reason: {case_clause,{error,closed}}
+    msg: roadrunner handler crashed
+    handler: roadrunner_httparena_handler
+    stacktrace: [{roadrunner_httparena_handler,consume_body,2,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,75}]},
+                 {roadrunner_httparena_handler,upload_endpoint,1,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,65}]},
+                 {roadrunner_compress,call,2,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_compress.erl"},
+                      {line,76}]},
+                 {roadrunner_conn_loop,run_pipeline,4,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_conn_loop.erl"},
+                      {line,576}]},
+                 {proc_lib,init_p_do_apply,3,
+                     [{file,"proc_lib.erl"},{line,333}]}]
+    class: error
+=ERROR REPORT==== 27-May-2026::22:58:58.421843 ===
+    reason: {case_clause,{error,closed}}
+    msg: roadrunner handler crashed
+    handler: roadrunner_httparena_handler
+    stacktrace: [{roadrunner_httparena_handler,consume_body,2,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,75}]},
+                 {roadrunner_httparena_handler,upload_endpoint,1,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,65}]},
+                 {roadrunner_compress,call,2,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_compress.erl"},
+                      {line,76}]},
+                 {roadrunner_conn_loop,run_pipeline,4,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_conn_loop.erl"},
+                      {line,576}]},
+                 {proc_lib,init_p_do_apply,3,
+                     [{file,"proc_lib.erl"},{line,333}]}]
+    class: error
+=ERROR REPORT==== 27-May-2026::22:58:58.421838 ===
+    reason: {case_clause,{error,closed}}
+    msg: roadrunner handler crashed
+    handler: roadrunner_httparena_handler
+    stacktrace: [{roadrunner_httparena_handler,consume_body,2,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,75}]},
+                 {roadrunner_httparena_handler,upload_endpoint,1,
+                     [{file,"/src/src/roadrunner_httparena_handler.erl"},
+                      {line,65}]},
+                 {roadrunner_compress,call,2,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_compress.erl"},
+                      {line,76}]},
+                 {roadrunner_conn_loop,run_pipeline,4,
+                     [{file,
+                          "/src/_build/default/lib/roadrunner/src/roadrunner_conn_loop.erl"},
+                      {line,576}]},
+                 {proc_lib,init_p_do_apply,3,
+                     [{file,"proc_lib.erl"},{line,333}]}]
+    class: error
+=ERROR REPORT==== 27-May-2026::22:58:58.421867 ===
     reason: {case_clause,{error,closed}}
     msg: roadrunner handler crashed
     handler: roadrunner_httparena_handler

@@ -3,8 +3,9 @@ using GenHTTP.Modules.Websockets.Protocol;
 
 namespace genhttp.Tests;
 
-class EchoHandler : IImperativeHandler
+public sealed class EchoHandler : IImperativeHandler
 {
+    
     public async ValueTask HandleAsync(IImperativeConnection connection)
     {
         while (true)
@@ -20,4 +21,5 @@ class EchoHandler : IImperativeHandler
             }
         }
     }
+    
 }

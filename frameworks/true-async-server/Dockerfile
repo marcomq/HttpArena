@@ -1,4 +1,4 @@
-FROM trueasync/php-true-async:0.7.0-beta.3-php8.6
+FROM trueasync/php-true-async:0.7.0-rc.3-php8.6
 
 RUN printf '%s\n' \
       'opcache.jit=1255' \
@@ -13,6 +13,6 @@ RUN printf '%s\n' \
 WORKDIR /app
 COPY entry.php PostgreSQL.php SQLite.php /app/
 
-EXPOSE 8080 8443
+EXPOSE 8080 8443 8443/udp
 
 CMD ["php", "/app/entry.php"]

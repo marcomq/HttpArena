@@ -108,6 +108,14 @@ async fn handle(dataset: Arc<Vec<DatasetItem>>, msg: CanonicalMessage) -> Result
     let method = msg.metadata.get("http_method").map(String::as_str).unwrap_or("");
     let path = msg.metadata.get("http_path").map(String::as_str).unwrap_or("");
     let query = msg.metadata.get("http_query").map(String::as_str).unwrap_or("");
+    let version = msg.metadata.get("http_version").map(String::as_str).unwrap_or("");
+
+    if version != "HTTP/2.0" && version != "HTTP/2" {
+        return Ok(Handled::Publish(
+            reply(b"HTTP/2 required".to_vec(), "text/plain; charset=utf-8")
+                .with_metadata_kv("http_status_code", "426"),
+        ));
+    }
 
     let out = match (method, path) {
         ("GET", "/pipeline") => reply(b"ok".to_vec(), "text/plain; charset=utf-8"),

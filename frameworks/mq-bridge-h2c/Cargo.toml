@@ -1,9 +1,10 @@
 # HttpArena entry for mq-bridge — cleartext HTTP/2 (h2c) on port 8082.
 #
 # Same library and route model as the core `mq-bridge` entry, trimmed to the
-# baseline + JSON endpoints the h2c profiles exercise. hyper-util's auto builder
-# serves HTTP/2 prior-knowledge on the cleartext port, which is what the
-# `baseline-h2c` / `json-h2c` load generators use.
+# baseline + JSON endpoints the h2c profiles exercise. The listener is pinned
+# to Hyper's HTTP/2 server path so the cleartext port only serves
+# prior-knowledge h2c, which is what the `baseline-h2c` / `json-h2c` load
+# generators use.
 [package]
 name = "httparena-mqbridge-h2c"
 version = "0.1.0"
@@ -15,7 +16,7 @@ name = "httparena-mqbridge-h2c"
 path = "src/main.rs"
 
 [dependencies]
-mq-bridge = { git = "https://github.com/marcomq/mq-bridge", tag = "v0.2.17", default-features = false, features = ["http"] }
+mq-bridge = { git = "https://github.com/marcomq/mq-bridge", tag = "v0.2.18", default-features = false, features = ["http"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

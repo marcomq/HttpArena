@@ -28,13 +28,15 @@
 //! client advertises `Accept-Encoding: gzip`, and sent identity otherwise — so
 //! the same `/json` handler serves both the `json` and `json-comp` profiles.
 
+use bytes::Bytes;
 use mq_bridge::models::{Endpoint, EndpointType, HttpConfig, TlsConfig};
 use mq_bridge::{CanonicalMessage, Handled, HandlerError, Route};
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{PgPool, Row};
+use std::collections::HashMap;
 use std::path::{Component, Path, PathBuf};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 const SERVER: &str = "mq-bridge";
 
@@ -85,8 +87,84 @@ struct JsonResponse<'a> {
 
 struct AppState {
     dataset: Vec<DatasetItem>,
-    static_dir: PathBuf,
+    /// Static assets read once at startup, with a pre-gzipped variant ready to
+    /// serve — no per-request filesystem read or allocation.
+    static_cache: HashMap<String, CachedBody>,
+    /// Memoized `/json/{count}?m=` responses (serialized once, gzipped once per
+    /// `(count, m)`), so `json` and `json-comp` never re-serialize or re-gzip.
+    json_cache: Mutex<HashMap<(usize, i64), Arc<CachedBody>>>,
     pool: Option<PgPool>,
+}
+
+/// A response body cached in both identity and gzip form. The gzip variant is
+/// only kept when it actually shrinks the body.
+struct CachedBody {
+    plain: Bytes,
+    gzip: Option<Bytes>,
+    content_type: &'static str,
+}
+
+impl CachedBody {
+    fn build(bytes: Vec<u8>, content_type: &'static str) -> Self {
+        let plain = Bytes::from(bytes);
+        let compressed = gzip(&plain);
+        let gzip = (compressed.len() < plain.len()).then_some(compressed);
+        Self {
+            plain,
+            gzip,
+            content_type,
+        }
+    }
+
+    /// Build a reply, serving the pre-gzipped variant when the client accepts it.
+    /// `content-encoding: gzip` is set on the reply; the mq-bridge HTTP layer
+    /// honors it and skips its own compression pass.
+    fn into_message(&self, want_gzip: bool) -> CanonicalMessage {
+        let (body, encoding) = match (want_gzip, &self.gzip) {
+            (true, Some(g)) => (g.clone(), Some("gzip")),
+            _ => (self.plain.clone(), None),
+        };
+        let mut msg = CanonicalMessage::new_bytes(body, None)
+            .with_metadata_kv("content-type", self.content_type)
+            .with_metadata_kv("Server", SERVER);
+        if let Some(encoding) = encoding {
+            msg = msg.with_metadata_kv("content-encoding", encoding);
+        }
+        msg
+    }
+}
+
+fn gzip(data: &[u8]) -> Bytes {
+    use flate2::{write::GzEncoder, Compression};
+    use std::io::Write;
+    let mut encoder = GzEncoder::new(Vec::new(), Compression::fast());
+    encoder.write_all(data).expect("gzip write");
+    Bytes::from(encoder.finish().expect("gzip finish"))
+}
+
+/// Whether the client advertised it can decode gzip (header captured in metadata).
+fn accepts_gzip(msg: &CanonicalMessage) -> bool {
+    msg.metadata
+        .get("accept-encoding")
+        .is_some_and(|v| v.to_ascii_lowercase().contains("gzip"))
+}
+
+fn load_static(dir: &Path) -> HashMap<String, CachedBody> {
+    let mut cache = HashMap::new();
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return cache;
+    };
+    for entry in entries.flatten() {
+        if entry.file_type().map(|ft| !ft.is_file()).unwrap_or(true) {
+            continue;
+        }
+        let name = entry.file_name().to_string_lossy().into_owned();
+        if let Ok(bytes) = std::fs::read(entry.path()) {
+            let content_type = content_type_for(&name);
+            cache.insert(name, CachedBody::build(bytes, content_type));
+        }
+    }
+    cache
 }
 
 fn load_dataset() -> Vec<DatasetItem> {
@@ -106,7 +184,7 @@ fn reply(body: Vec<u8>, content_type: &str) -> CanonicalMessage {
 }
 
 fn text(body: String) -> CanonicalMessage {
-    reply(body.into_bytes(), "text/plain; charset=utf-8")
+    reply(body.into_bytes(), "text/plain")
 }
 
 fn json(body: Vec<u8>) -> CanonicalMessage {
@@ -204,7 +282,7 @@ fn content_type_for(name: &str) -> &'static str {
     }
 }
 
-async fn serve_static(state: &AppState, name: &str) -> CanonicalMessage {
+fn serve_static(state: &AppState, name: &str, want_gzip: bool) -> CanonicalMessage {
     // Reject path traversal: the filename must be a single normal component.
     let candidate = Path::new(name);
     let mut comps = candidate.components();
@@ -212,17 +290,37 @@ async fn serve_static(state: &AppState, name: &str) -> CanonicalMessage {
     if !safe || name.is_empty() {
         return status(404, "Not Found");
     }
-    let path = state.static_dir.join(name);
-    match tokio::fs::read(&path).await {
-        Ok(bytes) => reply(bytes, content_type_for(name)),
-        Err(_) => status(404, "Not Found"),
+    match state.static_cache.get(name) {
+        Some(cached) => cached.into_message(want_gzip),
+        None => status(404, "Not Found"),
     }
+}
+
+/// Serve `/json/{count}?m=`, building+gzipping the body once per `(count, m)`.
+fn serve_json(state: &AppState, count: usize, m: i64, want_gzip: bool) -> CanonicalMessage {
+    let key = (count, m);
+    // Hold the lock across the build via the entry API so concurrent requests for
+    // the same uncached key don't each build+gzip the body redundantly.
+    let cached = state
+        .json_cache
+        .lock()
+        .unwrap()
+        .entry(key)
+        .or_insert_with(|| {
+            Arc::new(CachedBody::build(
+                build_json(&state.dataset, count, m),
+                "application/json",
+            ))
+        })
+        .clone();
+    cached.into_message(want_gzip)
 }
 
 async fn handle(state: Arc<AppState>, msg: CanonicalMessage) -> Result<Handled, HandlerError> {
     let method = msg.metadata.get("http_method").map(String::as_str).unwrap_or("");
     let path = msg.metadata.get("http_path").map(String::as_str).unwrap_or("");
     let query = msg.metadata.get("http_query").map(String::as_str).unwrap_or("");
+    let want_gzip = accepts_gzip(&msg);
 
     let out = match (method, path) {
         ("GET", "/pipeline") => text("ok".to_string()),
@@ -247,9 +345,11 @@ async fn handle(state: Arc<AppState>, msg: CanonicalMessage) -> Result<Handled, 
         ("GET", p) if p.starts_with("/json/") => {
             let count: usize = p["/json/".len()..].parse().unwrap_or(0);
             let m = query_int(query, "m").unwrap_or(1);
-            json(build_json(&state.dataset, count, m))
+            serve_json(&state, count, m, want_gzip)
         }
-        ("GET", p) if p.starts_with("/static/") => serve_static(&state, &p["/static/".len()..]).await,
+        ("GET", p) if p.starts_with("/static/") => {
+            serve_static(&state, &p["/static/".len()..], want_gzip)
+        }
         _ => status(404, "Not Found"),
     };
 
@@ -280,7 +380,8 @@ async fn main() -> anyhow::Result<()> {
 
     let state = Arc::new(AppState {
         dataset: load_dataset(),
-        static_dir: PathBuf::from(static_dir),
+        static_cache: load_static(&PathBuf::from(static_dir)),
+        json_cache: Mutex::new(HashMap::new()),
         pool,
     });
 
@@ -325,10 +426,11 @@ fn make_http(listen: String, tls: Option<TlsConfig>) -> HttpConfig {
     let mut http = HttpConfig::new(listen).with_inline_response_fast_path(true);
     http.concurrency_limit = Some(65_536);
     http.internal_buffer_size = Some(16_384);
-    // json-comp / static: gzip when the client advertises Accept-Encoding and the
-    // body is over the threshold; identity otherwise.
-    http.compression_enabled = true;
-    http.compression_threshold_bytes = Some(256);
+    // The handler owns compression: static and json bodies are pre-gzipped once
+    // and cached (see CachedBody), and the reply carries `content-encoding: gzip`
+    // when the client accepts it. So the server's per-request gzip pass is off —
+    // it would otherwise re-compress the same bodies on every request.
+    http.compression_enabled = false;
     if let Some(tls) = tls {
         http.tls = tls;
     }

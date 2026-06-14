@@ -19,11 +19,14 @@ path = "src/main.rs"
 
 [dependencies]
 # `rustls-ring` selects the ring crypto provider for the TLS (8443) listener.
-mq-bridge = { git = "https://github.com/marcomq/mq-bridge", tag = "v0.2.17", default-features = false, features = ["http", "rustls-ring"] }
+mq-bridge = { git = "https://github.com/marcomq/mq-bridge", tag = "v0.2.18", default-features = false, features = ["http", "rustls-ring"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "fs"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 anyhow = "1"
+# Zero-copy bodies + pre-gzip for the in-memory static/json caches.
+bytes = "1"
+flate2 = "1"
 # Install the process-default rustls crypto provider before the TLS endpoint.
 rustls = { version = "0.23", default-features = false, features = ["ring"] }
 # Async-db profile: own a Postgres pool in the handler (HttpArena seeds an

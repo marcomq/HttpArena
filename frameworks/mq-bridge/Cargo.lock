@@ -1158,6 +1158,8 @@ name = "httparena-mqbridge"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "bytes",
+ "flate2",
  "mq-bridge",
  "rustls",
  "serde",
@@ -1616,8 +1618,8 @@ dependencies = [
 
 [[package]]
 name = "mq-bridge"
-version = "0.2.17"
-source = "git+https://github.com/marcomq/mq-bridge?tag=v0.2.17#8b9fe010f90ec2ec272b60f31cfbf254fe9ffff0"
+version = "0.2.18"
+source = "git+https://github.com/marcomq/mq-bridge?tag=v0.2.18#6ecc01d06435318363f215c1febfc6219891c2d6"
 dependencies = [
  "anyhow",
  "async-channel",

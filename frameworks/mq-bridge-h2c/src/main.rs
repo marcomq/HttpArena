@@ -11,7 +11,7 @@
 //! * `GET  /baseline2?a=&b=`     -> `a+b`
 //! * `GET  /json/{count}?m=`     -> processed dataset JSON (from /data/dataset.json)
 
-use mq_bridge::models::{Endpoint, EndpointType, HttpConfig};
+use mq_bridge::models::{Endpoint, EndpointType, HttpConfig, HttpServerProtocol};
 use mq_bridge::{CanonicalMessage, Handled, HandlerError, Route};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -150,6 +150,7 @@ async fn main() -> anyhow::Result<()> {
     let dataset = Arc::new(load_dataset());
 
     let mut http = HttpConfig::new(listen).with_inline_response_fast_path(true);
+    http.server_protocol = HttpServerProtocol::Http2Only;
     http.concurrency_limit = Some(65_536);
     http.internal_buffer_size = Some(16_384);
 

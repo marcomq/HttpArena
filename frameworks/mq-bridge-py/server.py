@@ -30,6 +30,7 @@ client advertises ``Accept-Encoding: gzip``, identity otherwise — so the same
 
 from __future__ import annotations
 
+import gzip as _gzip
 import json as _json
 import os
 import signal
@@ -75,6 +76,11 @@ routes:
     output:
       response: {{}}
 """
+# Static assets are pre-gzipped once at startup (see CachedBody) and the reply
+# carries `content-encoding: gzip` when the client accepts it — mq-bridge honors
+# that and skips re-compressing them per request. Dynamic `/json` responses are
+# serialized fresh per request (no response caching) and compressed by the
+# library's per-request gzip when the client advertises Accept-Encoding.
 
 CONTENT_TYPES = {
     "js": "application/javascript",
@@ -85,6 +91,36 @@ CONTENT_TYPES = {
     "png": "image/png",
     "svg": "image/svg+xml",
 }
+
+
+class CachedBody:
+    """A response body cached in both identity and gzip form, with pre-built
+    reply metadata for each. Lets a hot endpoint serve a request with a dict
+    lookup and zero per-request serialization, gzip, or metadata allocation.
+    The gzip variant is only kept when it actually shrinks the body."""
+
+    __slots__ = ("plain", "gzip", "_meta_plain", "_meta_gzip")
+
+    def __init__(self, body: bytes, content_type: str):
+        self.plain = body
+        self._meta_plain = {"content-type": content_type, "Server": SERVER}
+        # mtime=0 keeps the gzip bytes deterministic across processes/restarts.
+        compressed = _gzip.compress(body, compresslevel=6, mtime=0)
+        if len(compressed) < len(body):
+            self.gzip = compressed
+            self._meta_gzip = {
+                "content-type": content_type,
+                "Server": SERVER,
+                "content-encoding": "gzip",
+            }
+        else:
+            self.gzip = None
+            self._meta_gzip = None
+
+    def message(self, request: "Message", want_gzip: bool) -> "Message":
+        if want_gzip and self.gzip is not None:
+            return request.__class__(self.gzip, self._meta_gzip)
+        return request.__class__(self.plain, self._meta_plain)
 
 
 def _load_dataset() -> list[dict]:
@@ -191,18 +227,43 @@ def _reply(request: Message, body: bytes, metadata: dict[str, str]) -> Message:
     return request.__class__(body, metadata)
 
 
-def _serve_static(request: Message, name: str) -> Message:
+def _accepts_gzip(message: Message) -> bool:
+    return "gzip" in message.metadata.get("accept-encoding", "").lower()
+
+
+def _load_static_cache() -> dict[str, CachedBody]:
+    # Read and pre-gzip every static asset once at startup so each request is a
+    # dict lookup with no filesystem I/O or per-request allocation. Built at
+    # import (before fork), so worker processes share it copy-on-write.
+    cache: dict[str, CachedBody] = {}
+    try:
+        entries = list(STATIC_DIR.iterdir())
+    except OSError:
+        return cache
+    for entry in entries:
+        try:
+            if entry.is_file():
+                cache[entry.name] = CachedBody(
+                    entry.read_bytes(), _content_type_for(entry.name)
+                )
+        except OSError:
+            continue
+    return cache
+
+
+STATIC_CACHE = _load_static_cache()
+
+
+def _serve_static(request: Message, name: str, want_gzip: bool) -> Message:
     # Reject path traversal: the name must be a single normal path component.
+    # (The cache is keyed by bare filename, so traversal can't hit an entry, but
+    # keep the explicit guard for clarity.)
     if not name or "/" in name or name in (".", ".."):
         return _reply(request, b"Not Found", NOT_FOUND_META)
-    target = (STATIC_DIR / name).resolve()
-    if STATIC_DIR not in target.parents and target != STATIC_DIR:
+    cached = STATIC_CACHE.get(name)
+    if cached is None:
         return _reply(request, b"Not Found", NOT_FOUND_META)
-    try:
-        body = target.read_bytes()
-    except OSError:
-        return _reply(request, b"Not Found", NOT_FOUND_META)
-    return _reply(request, body, {"content-type": _content_type_for(name), "Server": SERVER})
+    return cached.message(request, want_gzip)
 
 
 def handle(message: Message) -> Message:
@@ -233,7 +294,7 @@ def handle(message: Message) -> Message:
             count = 0
         return _reply(message, _build_json(count, _query_int(qs, "m", 1)), JSON_META)
     if method == "GET" and path.startswith("/static/"):
-        return _serve_static(message, path[len("/static/"):])
+        return _serve_static(message, path[len("/static/"):], _accepts_gzip(message))
     return _reply(message, b"Not Found", NOT_FOUND_META)
 
 

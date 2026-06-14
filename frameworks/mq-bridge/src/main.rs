@@ -36,7 +36,7 @@ use sqlx::postgres::PgPoolOptions;
 use sqlx::{PgPool, Row};
 use std::collections::HashMap;
 use std::path::{Component, Path, PathBuf};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 const SERVER: &str = "mq-bridge";
 
@@ -90,9 +90,6 @@ struct AppState {
     /// Static assets read once at startup, with a pre-gzipped variant ready to
     /// serve — no per-request filesystem read or allocation.
     static_cache: HashMap<String, CachedBody>,
-    /// Memoized `/json/{count}?m=` responses (serialized once, gzipped once per
-    /// `(count, m)`), so `json` and `json-comp` never re-serialize or re-gzip.
-    json_cache: Mutex<HashMap<(usize, i64), Arc<CachedBody>>>,
     pool: Option<PgPool>,
 }
 
@@ -296,24 +293,12 @@ fn serve_static(state: &AppState, name: &str, want_gzip: bool) -> CanonicalMessa
     }
 }
 
-/// Serve `/json/{count}?m=`, building+gzipping the body once per `(count, m)`.
-fn serve_json(state: &AppState, count: usize, m: i64, want_gzip: bool) -> CanonicalMessage {
-    let key = (count, m);
-    // Hold the lock across the build via the entry API so concurrent requests for
-    // the same uncached key don't each build+gzip the body redundantly.
-    let cached = state
-        .json_cache
-        .lock()
-        .unwrap()
-        .entry(key)
-        .or_insert_with(|| {
-            Arc::new(CachedBody::build(
-                build_json(&state.dataset, count, m),
-                "application/json",
-            ))
-        })
-        .clone();
-    cached.into_message(want_gzip)
+/// Serve `/json/{count}?m=`, serializing the body fresh on every request (no
+/// response caching). The library compresses it per request when the client
+/// advertises `Accept-Encoding: gzip` (see `make_http`), so `json` and
+/// `json-comp` measure real serialization + compression work.
+fn serve_json(state: &AppState, count: usize, m: i64) -> CanonicalMessage {
+    json(build_json(&state.dataset, count, m))
 }
 
 async fn handle(state: Arc<AppState>, msg: CanonicalMessage) -> Result<Handled, HandlerError> {
@@ -345,7 +330,7 @@ async fn handle(state: Arc<AppState>, msg: CanonicalMessage) -> Result<Handled, 
         ("GET", p) if p.starts_with("/json/") => {
             let count: usize = p["/json/".len()..].parse().unwrap_or(0);
             let m = query_int(query, "m").unwrap_or(1);
-            serve_json(&state, count, m, want_gzip)
+            serve_json(&state, count, m)
         }
         ("GET", p) if p.starts_with("/static/") => {
             serve_static(&state, &p["/static/".len()..], want_gzip)
@@ -381,7 +366,6 @@ async fn main() -> anyhow::Result<()> {
     let state = Arc::new(AppState {
         dataset: load_dataset(),
         static_cache: load_static(&PathBuf::from(static_dir)),
-        json_cache: Mutex::new(HashMap::new()),
         pool,
     });
 
@@ -426,11 +410,13 @@ fn make_http(listen: String, tls: Option<TlsConfig>) -> HttpConfig {
     let mut http = HttpConfig::new(listen).with_inline_response_fast_path(true);
     http.concurrency_limit = Some(65_536);
     http.internal_buffer_size = Some(16_384);
-    // The handler owns compression: static and json bodies are pre-gzipped once
-    // and cached (see CachedBody), and the reply carries `content-encoding: gzip`
-    // when the client accepts it. So the server's per-request gzip pass is off —
-    // it would otherwise re-compress the same bodies on every request.
-    http.compression_enabled = false;
+    // Static assets are pre-gzipped once at startup (see CachedBody) and the reply
+    // carries `content-encoding: gzip` when the client accepts it — the library
+    // honors that and skips re-compressing them. Dynamic `/json` responses are
+    // serialized fresh per request (no response caching) and compressed by the
+    // library's per-request gzip when the client advertises Accept-Encoding.
+    http.compression_enabled = true;
+    http.compression_threshold_bytes = Some(256);
     if let Some(tls) = tls {
         http.tls = tls;
     }

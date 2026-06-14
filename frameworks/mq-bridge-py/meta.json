@@ -1,0 +1,23 @@
+{
+  "display_name": "mq-bridge-py",
+  "language": "Python",
+  "type": "emerging",
+  "mode": "standard",
+  "engine": "mq-bridge",
+  "description": "mq-bridge Python bindings (mq_bridge_py). A single http->response route serves the cleartext HTTP/1.1 + h2c profiles; HTTP framing stays in Rust and the inline-response fast path keeps responses off the GIL, so the Python handler runs only the per-request dispatch.",
+  "repo": "https://github.com/marcomq/mq-bridge",
+  "enabled": true,
+  "tests": [
+    "baseline",
+    "pipelined",
+    "limited-conn",
+    "json",
+    "json-comp",
+    "upload",
+    "static",
+    "async-db",
+    "api-4",
+    "api-16"
+  ],
+  "maintainers": []
+}

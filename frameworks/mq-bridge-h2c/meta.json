@@ -1,0 +1,15 @@
+{
+  "display_name": "mq-bridge",
+  "language": "Rust",
+  "type": "emerging",
+  "mode": "standard",
+  "engine": "mq-bridge",
+  "description": "mq-bridge HTTP server bound to port 8082 for cleartext HTTP/2 (h2c). hyper-util's auto connection builder serves HTTP/2 prior-knowledge on the plaintext port; baseline + JSON endpoints share the route model of the core mq-bridge entry.",
+  "repo": "https://github.com/marcomq/mq-bridge",
+  "enabled": true,
+  "tests": [
+    "baseline-h2c",
+    "json-h2c"
+  ],
+  "maintainers": []
+}

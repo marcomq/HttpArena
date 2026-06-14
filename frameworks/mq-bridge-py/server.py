@@ -187,18 +187,22 @@ def _content_type_for(name: str) -> str:
     return CONTENT_TYPES.get(ext, "application/octet-stream")
 
 
-def _serve_static(name: str) -> Message:
+def _reply(request: Message, body: bytes, metadata: dict[str, str]) -> Message:
+    return request.__class__(body, metadata)
+
+
+def _serve_static(request: Message, name: str) -> Message:
     # Reject path traversal: the name must be a single normal path component.
     if not name or "/" in name or name in (".", ".."):
-        return Message(b"Not Found", NOT_FOUND_META)
+        return _reply(request, b"Not Found", NOT_FOUND_META)
     target = (STATIC_DIR / name).resolve()
     if STATIC_DIR not in target.parents and target != STATIC_DIR:
-        return Message(b"Not Found", NOT_FOUND_META)
+        return _reply(request, b"Not Found", NOT_FOUND_META)
     try:
         body = target.read_bytes()
     except OSError:
-        return Message(b"Not Found", NOT_FOUND_META)
-    return Message(body, {"content-type": _content_type_for(name), "Server": SERVER})
+        return _reply(request, b"Not Found", NOT_FOUND_META)
+    return _reply(request, body, {"content-type": _content_type_for(name), "Server": SERVER})
 
 
 def handle(message: Message) -> Message:
@@ -207,30 +211,30 @@ def handle(message: Message) -> Message:
     qs = parse_qs(message.metadata.get("http_query", ""))
 
     if method == "GET" and path == "/pipeline":
-        return Message(b"ok", TEXT_META)
+        return _reply(message, b"ok", TEXT_META)
     if method == "GET" and path in ("/baseline11", "/baseline2"):
         total = _query_int(qs, "a", 0) + _query_int(qs, "b", 0)
-        return Message(str(total).encode(), TEXT_META)
+        return _reply(message, str(total).encode(), TEXT_META)
     if method == "POST" and path == "/baseline11":
         total = _query_int(qs, "a", 0) + _query_int(qs, "b", 0)
         try:
             total += int(bytes(message.payload).decode().strip())
         except (ValueError, UnicodeDecodeError):
             pass
-        return Message(str(total).encode(), TEXT_META)
+        return _reply(message, str(total).encode(), TEXT_META)
     if method == "POST" and path == "/upload":
-        return Message(str(len(message.payload)).encode(), TEXT_META)
+        return _reply(message, str(len(message.payload)).encode(), TEXT_META)
     if method == "GET" and path == "/async-db":
-        return Message(_async_db(qs), JSON_META)
+        return _reply(message, _async_db(qs), JSON_META)
     if method == "GET" and path.startswith("/json/"):
         try:
             count = int(path[len("/json/"):])
         except ValueError:
             count = 0
-        return Message(_build_json(count, _query_int(qs, "m", 1)), JSON_META)
+        return _reply(message, _build_json(count, _query_int(qs, "m", 1)), JSON_META)
     if method == "GET" and path.startswith("/static/"):
-        return _serve_static(path[len("/static/"):])
-    return Message(b"Not Found", NOT_FOUND_META)
+        return _serve_static(message, path[len("/static/"):])
+    return _reply(message, b"Not Found", NOT_FOUND_META)
 
 
 def _run_worker(http_workers: int) -> None:

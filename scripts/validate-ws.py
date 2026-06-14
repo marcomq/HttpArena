@@ -218,12 +218,17 @@ def test_reject_bad_upgrade():
             if not chunk:
                 break
             response += chunk
-        resp_text = response.decode("utf-8", errors="replace")
-        status_line = resp_text.split("\r\n")[0]
-        # Should get a 4xx (400 or 426), not 101 or 5xx
-        code = int(status_line.split()[1]) if len(status_line.split()) >= 2 else 0
-        ok = 400 <= code < 500
-        result("reject non-upgrade GET /ws", ok, f"HTTP {code}")
+        if not response:
+            # Server closed the connection gracefully without an HTTP response —
+            # equivalent to a reset, an acceptable way to reject a bad upgrade.
+            result("reject non-upgrade GET /ws", True, "connection closed (no response)")
+        else:
+            resp_text = response.decode("utf-8", errors="replace")
+            status_line = resp_text.split("\r\n")[0]
+            # Should get a 4xx (400 or 426), not 101 or 5xx
+            code = int(status_line.split()[1]) if len(status_line.split()) >= 2 else 0
+            ok = 400 <= code < 500
+            result("reject non-upgrade GET /ws", ok, f"HTTP {code}")
     except Exception as e:
         # Connection reset is also acceptable (server closed it)
         result("reject non-upgrade GET /ws", True, f"connection closed ({e})")

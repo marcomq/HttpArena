@@ -63,7 +63,7 @@ def _config(http_workers: int) -> str:
 routes:
   httparena:
     concurrency: 1
-    batch_size: 512
+    batch_size: 1024
     input:
       http:
         url: "{LISTEN}"

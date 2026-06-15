@@ -428,5 +428,10 @@ fn make_http(listen: String, tls: Option<TlsConfig>) -> HttpConfig {
 fn build_route(http: HttpConfig, state: Arc<AppState>) -> Route {
     let input = Endpoint::new(EndpointType::Http(http));
     let output = Endpoint::new_response();
-    Route::new(input, output).with_handler(move |msg| handle(state.clone(), msg))
+    // Batch dispatch matches the Python entry's `batch_size: 1024` so the
+    // pipelined profile (16 reqs/conn) is measured on equal footing; the
+    // library default is 1, which collapses pipelining to one msg/dispatch.
+    Route::new(input, output)
+        .with_batch_size(1024)
+        .with_handler(move |msg| handle(state.clone(), msg))
 }

@@ -34,8 +34,12 @@ async fn main() -> anyhow::Result<()> {
     let input = Endpoint::new(EndpointType::WebSocket(ws));
     let output = Endpoint::new_response();
 
+    // batch_size defaults to 1, which funnels every frame through one
+    // dispatch; raise it so the echo path can coalesce frames per consumer
+    // poll (the HTTP entry uses 1024 for the same reason).
     let route = Route::new(input, output)
         .with_concurrency(workers)
+        .with_batch_size(1024)
         .with_handler(echo);
     let handle = route.run("httparena-ws").await?;
     handle.join().await?;

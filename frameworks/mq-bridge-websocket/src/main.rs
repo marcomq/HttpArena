@@ -34,9 +34,10 @@ async fn main() -> anyhow::Result<()> {
     let input = Endpoint::new(EndpointType::WebSocket(ws));
     let output = Endpoint::new_response();
 
-    // batch_size defaults to 1, which funnels every frame through one
-    // dispatch; raise it so the echo path can coalesce frames per consumer
-    // poll (the HTTP entry uses 1024 for the same reason).
+    // Unlike the HTTP entries (inline fast path bypasses the route consumer),
+    // the WS echo path DOES run through the consumer/batch pipeline, so
+    // batch_size applies here. Raised from the default 1 to coalesce frames per
+    // consumer poll — unverified; confirm with an echo-ws run before trusting it.
     let route = Route::new(input, output)
         .with_concurrency(workers)
         .with_batch_size(1024)

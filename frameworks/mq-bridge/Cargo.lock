@@ -82,6 +82,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f202df86484c868dbad7eaa557ef785d5c66295e41b460ef922eca0723b842c"
 
 [[package]]
+name = "arc-swap"
+version = "1.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a3a1fd6f75306b68087b831f025c712524bcb19aad54e557b1129cfa0a2b207"
+dependencies = [
+ "rustversion",
+]
+
+[[package]]
 name = "asn1-rs"
 version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1619,9 +1628,10 @@ dependencies = [
 [[package]]
 name = "mq-bridge"
 version = "0.2.18"
-source = "git+https://github.com/marcomq/mq-bridge?tag=v0.2.18#6ecc01d06435318363f215c1febfc6219891c2d6"
+source = "git+https://github.com/marcomq/mq-bridge?branch=dev#79535ca56afa909dc9ad88daefde3bfbd4b7bbfd"
 dependencies = [
  "anyhow",
+ "arc-swap",
  "async-channel",
  "async-trait",
  "base64",
@@ -3254,7 +3264,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]

@@ -1627,8 +1627,8 @@ dependencies = [
 
 [[package]]
 name = "mq-bridge"
-version = "0.2.18"
-source = "git+https://github.com/marcomq/mq-bridge?branch=dev#79535ca56afa909dc9ad88daefde3bfbd4b7bbfd"
+version = "0.2.19"
+source = "git+https://github.com/marcomq/mq-bridge?tag=v0.2.19#f5c1156e29259c2828cc99af5aa2743746a23aed"
 dependencies = [
  "anyhow",
  "arc-swap",
@@ -3264,7 +3264,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.48.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]

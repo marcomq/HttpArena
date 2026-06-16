@@ -437,8 +437,8 @@ dependencies = [
 
 [[package]]
 name = "mq-bridge"
-version = "0.2.18"
-source = "git+https://github.com/marcomq/mq-bridge?tag=v0.2.18#6ecc01d06435318363f215c1febfc6219891c2d6"
+version = "0.2.19"
+source = "git+https://github.com/marcomq/mq-bridge?tag=v0.2.19#f5c1156e29259c2828cc99af5aa2743746a23aed"
 dependencies = [
  "anyhow",
  "async-channel",

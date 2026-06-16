@@ -849,6 +849,25 @@
     "status_5xx": 0
   },
   {
+    "framework": "mq-bridge-py",
+    "language": "Python",
+    "rps": 2661143,
+    "avg_latency": "24.58ms",
+    "p99_latency": "57.70ms",
+    "cpu": "6512.3%",
+    "memory": "1.3GiB",
+    "connections": 4096,
+    "threads": 64,
+    "duration": "5s",
+    "pipeline": 16,
+    "bandwidth": "481.78MB/s",
+    "reconnects": 0,
+    "status_2xx": 13305715,
+    "status_3xx": 0,
+    "status_4xx": 0,
+    "status_5xx": 0
+  },
+  {
     "framework": "nginx",
     "language": "C",
     "rps": 3801212,

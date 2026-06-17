@@ -9,18 +9,16 @@
 //! the Response output sends it back as a Reply on the originating socket. The
 //! reply honours `ws_message_type`, so text stays text and binary stays binary.
 
-use mq_bridge::models::{Endpoint, EndpointType, WebSocketConfig};
+use mq_bridge::models::{BufferMiddleware, Endpoint, EndpointType, Middleware, WebSocketConfig};
 use mq_bridge::{CanonicalMessage, Handled, HandlerError, Route};
 
 async fn echo(msg: CanonicalMessage) -> Result<Handled, HandlerError> {
-    let ws_type = msg
-        .metadata
-        .get("ws_message_type")
-        .cloned()
-        .unwrap_or_else(|| "text".to_string());
-    let reply = CanonicalMessage::new(msg.payload.to_vec(), None)
-        .with_metadata_kv("ws_message_type", ws_type);
-    Ok(Handled::Publish(reply))
+    // The inbound message already carries the original payload and the
+    // `ws_message_type` metadata (set by the WS consumer), and the reply path
+    // reads `ws_message_type` straight off it — so echo it back as-is. This
+    // avoids a payload copy, a String clone, a fresh CanonicalMessage, and a
+    // metadata insert on every frame.
+    Ok(Handled::Publish(msg))
 }
 
 #[tokio::main]
@@ -31,7 +29,26 @@ async fn main() -> anyhow::Result<()> {
         .unwrap_or(8);
 
     let ws = WebSocketConfig::new(listen).with_path("/ws");
-    let input = Endpoint::new(EndpointType::WebSocket(ws));
+    let mut input = Endpoint::new(EndpointType::WebSocket(ws));
+
+    // Input buffer middleware: coalesce inbound frames from all connections so
+    // the route consumer dispatches them in larger batches. Tunable via env so
+    // the benchmark can sweep values:
+    //   MQB_BUF_MAX_MSGS    - flush once this many frames are buffered (default 512)
+    //   MQB_BUF_MAX_DELAY_MS - flush a partial buffer after this long (default 1ms)
+    let buf_max_messages = std::env::var("MQB_BUF_MAX_MSGS")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(512usize);
+    let buf_max_delay_ms = std::env::var("MQB_BUF_MAX_DELAY_MS")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(1u64);
+    input.middlewares = vec![Middleware::Buffer(BufferMiddleware {
+        max_messages: buf_max_messages,
+        max_delay_ms: buf_max_delay_ms,
+    })];
+
     let output = Endpoint::new_response();
 
     // Unlike the HTTP entries (inline fast path bypasses the route consumer),

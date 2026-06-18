@@ -646,6 +646,25 @@
     "status_5xx": 0
   },
   {
+    "framework": "mq-bridge",
+    "language": "Rust",
+    "rps": 485756,
+    "avg_latency": "8.84ms",
+    "p99_latency": "65.16ms",
+    "cpu": "6580.5%",
+    "memory": "807MiB",
+    "connections": 4096,
+    "threads": 64,
+    "duration": "5s",
+    "pipeline": 1,
+    "bandwidth": "11.78GB",
+    "reconnects": 0,
+    "status_2xx": 2477360,
+    "status_3xx": 0,
+    "status_4xx": 0,
+    "status_5xx": 0
+  },
+  {
     "framework": "nginx",
     "language": "C",
     "rps": 1104145,

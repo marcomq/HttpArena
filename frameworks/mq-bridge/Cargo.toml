@@ -6,8 +6,8 @@
 # in via a pinned git reference. hyper-util's auto connection builder serves both
 # HTTP/1.1 and HTTP/2 prior-knowledge (h2c) on the plaintext port; the same
 # builder runs behind the TLS listener, where the library now advertises ALPN
-# `h2`. Pinned to a released `tag` for reproducible benchmarks; switch to a
-# `branch` to benchmark unreleased code.
+# `h2`. Tracks the `dev` branch to benchmark unreleased code; pin to a `tag` or
+# exact `rev` for reproducible benchmarks.
 [package]
 name = "httparena-mqbridge"
 version = "0.1.0"
@@ -20,7 +20,7 @@ path = "src/main.rs"
 
 [dependencies]
 # `rustls-ring` selects the ring crypto provider for the TLS (8443) listener.
-mq-bridge = { git = "https://github.com/marcomq/mq-bridge", tag = "v0.2.19", default-features = false, features = ["http", "rustls-ring"] }
+mq-bridge = { git = "https://github.com/marcomq/mq-bridge", branch = "dev", default-features = false, features = ["http", "rustls-ring"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "fs"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

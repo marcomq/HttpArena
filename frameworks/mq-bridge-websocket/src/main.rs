@@ -28,7 +28,8 @@ async fn main() -> anyhow::Result<()> {
         .map(|n| n.get())
         .unwrap_or(8);
 
-    let ws = WebSocketConfig::new(listen).with_path("/ws");
+    let mut ws = WebSocketConfig::new(listen).with_path("/ws");
+    ws.internal_buffer_size = Some(65_536);
     let mut input = Endpoint::new(EndpointType::WebSocket(ws));
 
     // Input buffer middleware: coalesce inbound frames from all connections so

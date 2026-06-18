@@ -12,8 +12,8 @@
 //! * `GET  /pipeline`                     -> `ok`               (baseline/pipelined/limited-conn)
 //! * `GET  /baseline11?a=&b=`             -> `a+b`              (baseline)
 //! * `POST /baseline11?a=&b=` + body int  -> `a+b+body`
-//! * `GET  /baseline2?a=&b=`              -> `a+b`
-//! * `GET  /json/{count}?m=`              -> processed dataset JSON   (json/json-comp)
+//! * `GET  /baseline2?a=&b=`              -> `a+b`                     (baseline-h2/-h2c)
+//! * `GET  /json/{count}?m=`              -> processed dataset JSON   (json/json-comp/json-tls/json-h2c)
 //! * `POST /upload` + body                -> received byte count      (upload)
 //! * `GET  /async-db?min=&max=&limit=`    -> Postgres `items` rows    (async-db)
 //! * `GET  /static/{file}`                -> file from /data/static   (static)
@@ -27,9 +27,14 @@
 //! (`compression_enabled`): bodies above the threshold are gzip-encoded when the
 //! client advertises `Accept-Encoding: gzip`, and sent identity otherwise — so
 //! the same `/json` handler serves both the `json` and `json-comp` profiles.
+//!
+//! `json-tls` reuses that same `/json` handler over HTTP/1.1 + TLS on `8081`
+//! (ALPN `http/1.1` only), alongside the HTTP/2-over-TLS listener on `8443`. A
+//! cleartext HTTP/2-only (`h2c`) listener on `8082` serves the `baseline-h2c` and
+//! `json-h2c` profiles from the same handlers.
 
 use bytes::Bytes;
-use mq_bridge::models::{Endpoint, EndpointType, HttpConfig, TlsConfig};
+use mq_bridge::models::{Endpoint, EndpointType, HttpConfig, HttpServerProtocol, TlsConfig};
 use mq_bridge::{CanonicalMessage, Handled, HandlerError, Route};
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPoolOptions;
@@ -247,17 +252,19 @@ async fn async_db(pool: &PgPool, query: &str) -> CanonicalMessage {
     let items: Vec<serde_json::Value> = rows
         .iter()
         .map(|row| {
+            // Positional column access (by SELECT order) avoids sqlx's per-field
+            // name->ordinal lookup; columns match the query above.
             serde_json::json!({
-                "id": row.get::<i32, _>("id"),
-                "name": row.get::<&str, _>("name"),
-                "category": row.get::<&str, _>("category"),
-                "price": row.get::<i32, _>("price"),
-                "quantity": row.get::<i32, _>("quantity"),
-                "active": row.get::<bool, _>("active"),
-                "tags": row.get::<serde_json::Value, _>("tags"),
+                "id": row.get::<i32, _>(0),
+                "name": row.get::<&str, _>(1),
+                "category": row.get::<&str, _>(2),
+                "price": row.get::<i32, _>(3),
+                "quantity": row.get::<i32, _>(4),
+                "active": row.get::<bool, _>(5),
+                "tags": row.get::<serde_json::Value, _>(6),
                 "rating": {
-                    "score": row.get::<i32, _>("rating_score"),
-                    "count": row.get::<i32, _>("rating_count"),
+                    "score": row.get::<i32, _>(7),
+                    "count": row.get::<i32, _>(8),
                 }
             })
         })
@@ -373,36 +380,62 @@ async fn main() -> anyhow::Result<()> {
     let plaintext = build_route(make_http(listen, None), state.clone());
     let mut handles = vec![plaintext.run("httparena").await?];
 
-    // HTTP/2 over TLS on 8443 (baseline-h2 / static-h2 / json-tls). The library
-    // advertises ALPN `h2`, so conformant clients negotiate HTTP/2 over the TLS
-    // port. Only enabled when the harness has mounted the certs, so a local
+    // HTTP/2 cleartext (prior-knowledge) on 8082 (baseline-h2c / json-h2c), using
+    // the same `/baseline2` and `/json` handlers. `Http2Only` makes the port
+    // refuse HTTP/1.1, satisfying the h2c-only anti-cheat (a dual-serving port is
+    // rejected). Cleartext, so no certs are needed.
+    let h2c_listen = std::env::var("MQB_H2C_LISTEN").unwrap_or_else(|_| "0.0.0.0:8082".to_string());
+    let h2c = make_http(h2c_listen, None).with_server_protocol(HttpServerProtocol::Http2Only);
+    handles.push(build_route(h2c, state.clone()).run("httparena-h2c").await?);
+
+    // TLS listeners, only when the harness has mounted certs — a local
     // plaintext-only run still works.
-    let cert = std::env::var("TLS_CERT").unwrap_or_else(|_| "/certs/server.crt".to_string());
-    let key = std::env::var("TLS_KEY").unwrap_or_else(|_| "/certs/server.key".to_string());
-    if Path::new(&cert).is_file() && Path::new(&key).is_file() {
-        // rustls needs a process-default crypto provider before any TLS endpoint.
-        match rustls::crypto::ring::default_provider().install_default() {
-            Ok(()) => {}
-            Err(provider) => eprintln!(
-                "rustls ring crypto provider was not installed; a process default is already set (attempted provider: {provider:?})"
-            ),
-        }
+    if let Some(tls) = tls_config() {
+        // HTTP/2 over TLS on 8443 (baseline-h2 / static-h2): ALPN advertises `h2`.
         let tls_listen =
             std::env::var("MQB_TLS_LISTEN").unwrap_or_else(|_| "0.0.0.0:8443".to_string());
-        let mut tls = TlsConfig::new();
-        tls.required = true;
-        tls.cert_file = Some(cert);
-        tls.key_file = Some(key);
-        let tls_route = build_route(make_http(tls_listen, Some(tls)), state.clone());
+        let tls_route = build_route(make_http(tls_listen, Some(tls.clone())), state.clone());
         handles.push(tls_route.run("httparena-tls").await?);
-    } else {
-        eprintln!("TLS certs not found ({cert} / {key}); serving plaintext only");
+
+        // JSON over HTTP/1.1 + TLS on 8081 (json-tls): the same `/json` handler,
+        // but the port advertises ALPN `http/1.1` only so the wrk load generator
+        // negotiates HTTP/1.1 rather than upgrading to h2.
+        let h1tls_listen =
+            std::env::var("MQB_H1TLS_LISTEN").unwrap_or_else(|_| "0.0.0.0:8081".to_string());
+        let h1tls = make_http(h1tls_listen, Some(tls))
+            .with_server_protocol(HttpServerProtocol::Http1Only);
+        let h1tls_route = build_route(h1tls, state.clone());
+        handles.push(h1tls_route.run("httparena-json-tls").await?);
     }
 
     for handle in handles {
         handle.join().await?;
     }
     Ok(())
+}
+
+/// Build the TLS config for the 8443 listener from `TLS_CERT` / `TLS_KEY`,
+/// installing the process-default rustls crypto provider as a side effect.
+/// Returns `None` (and logs) when the certs aren't present, so plaintext-only
+/// runs are unaffected.
+fn tls_config() -> Option<TlsConfig> {
+    let cert = std::env::var("TLS_CERT").unwrap_or_else(|_| "/certs/server.crt".to_string());
+    let key = std::env::var("TLS_KEY").unwrap_or_else(|_| "/certs/server.key".to_string());
+    if !Path::new(&cert).is_file() || !Path::new(&key).is_file() {
+        eprintln!("TLS certs not found ({cert} / {key}); serving plaintext only");
+        return None;
+    }
+    // rustls needs a process-default crypto provider before any TLS endpoint.
+    if let Err(provider) = rustls::crypto::ring::default_provider().install_default() {
+        eprintln!(
+            "rustls ring crypto provider was not installed; a process default is already set (attempted provider: {provider:?})"
+        );
+    }
+    let mut tls = TlsConfig::new();
+    tls.required = true;
+    tls.cert_file = Some(cert);
+    tls.key_file = Some(key);
+    Some(tls)
 }
 
 /// Shared HTTP listener config; `tls` set => HTTPS (ALPN h2) on the TLS port.
@@ -428,10 +461,7 @@ fn make_http(listen: String, tls: Option<TlsConfig>) -> HttpConfig {
 fn build_route(http: HttpConfig, state: Arc<AppState>) -> Route {
     let input = Endpoint::new(EndpointType::Http(http));
     let output = Endpoint::new_response();
-    // Batch dispatch matches the Python entry's `batch_size: 1024` so the
-    // pipelined profile (16 reqs/conn) is measured on equal footing; the
-    // library default is 1, which collapses pipelining to one msg/dispatch.
-    Route::new(input, output)
-        .with_batch_size(1024)
-        .with_handler(move |msg| handle(state.clone(), msg))
+    // The HTTP inline-response fast path (see `make_http`) handles each request
+    // directly, so the route's batch size is left at the library default.
+    Route::new(input, output).with_handler(move |msg| handle(state.clone(), msg))
 }

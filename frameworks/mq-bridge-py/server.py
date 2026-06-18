@@ -35,6 +35,7 @@ import json as _json
 import os
 import signal
 import tempfile
+import threading
 import time
 from pathlib import Path
 from urllib.parse import parse_qs
@@ -42,6 +43,11 @@ from urllib.parse import parse_qs
 from mq_bridge import Message, Route
 
 LISTEN = os.environ.get("MQB_LISTEN", "0.0.0.0:8080")
+H2C_LISTEN = os.environ.get("MQB_H2C_LISTEN", "0.0.0.0:8082")
+TLS_LISTEN = os.environ.get("MQB_TLS_LISTEN", "0.0.0.0:8443")
+H1TLS_LISTEN = os.environ.get("MQB_H1TLS_LISTEN", "0.0.0.0:8081")
+TLS_CERT = os.environ.get("TLS_CERT", "/certs/server.crt")
+TLS_KEY = os.environ.get("TLS_KEY", "/certs/server.key")
 DATASET_PATH = os.environ.get("DATASET_PATH", "/data/dataset.json")
 STATIC_DIR = Path(os.environ.get("STATIC_DIR", "/data/static")).resolve()
 
@@ -54,28 +60,80 @@ NOT_FOUND_META = {
     "http_status_code": "404",
 }
 
-def _config(http_workers: int) -> str:
-    # `http_workers` is the number of accept loops (each its own SO_REUSEPORT
-    # listener) inside this process. When we fan out across processes we keep
-    # this small (the single Python worker is the per-process bottleneck); in
-    # single-process mode we use all cores, matching the previous default.
+def _tls_available() -> bool:
+    return Path(TLS_CERT).is_file() and Path(TLS_KEY).is_file()
+
+
+def _http_route(name: str, listen: str, http_workers: int, extra: str = "") -> str:
     return f"""
-routes:
-  httparena:
+  {name}:
     concurrency: 1
     batch_size: 1024
     input:
       http:
-        url: "{LISTEN}"
+        url: "{listen}"
         workers: {http_workers}
         concurrency_limit: 65536
         internal_buffer_size: 16384
         inline_response_fast_path: true
         compression_enabled: true
         compression_threshold_bytes: 256
+{extra}
     output:
       response: {{}}
 """
+
+
+def _config(http_workers: int) -> tuple[str, list[str]]:
+    # `http_workers` is the number of accept loops (each its own SO_REUSEPORT
+    # listener) inside this process. When we fan out across processes we keep
+    # this small (the single Python worker is the per-process bottleneck); in
+    # single-process mode we use all cores, matching the previous default.
+    names = ["httparena"]
+    routes = [_http_route(names[0], LISTEN, http_workers)]
+
+    # HTTP/2 cleartext (prior-knowledge) on 8082 (baseline-h2c / json-h2c), using
+    # the same handlers as the plaintext listener. `http2_only` makes the port
+    # refuse HTTP/1.1, satisfying the h2c-only anti-cheat (a dual-serving port is
+    # rejected). Cleartext, so no certs are needed.
+    names.append("httparena-h2c")
+    routes.append(
+        _http_route(
+            names[-1],
+            H2C_LISTEN,
+            http_workers,
+            "        server_protocol: http2_only",
+        )
+    )
+
+    # TLS listeners, only when the harness has mounted certs — a local
+    # plaintext-only run still works.
+    if _tls_available():
+        tls_block = (
+            f'        tls:\n'
+            f'          required: true\n'
+            f'          cert_file: "{TLS_CERT}"\n'
+            f'          key_file: "{TLS_KEY}"'
+        )
+        # HTTP/2 over TLS on 8443 (baseline-h2 / static-h2): ALPN advertises `h2`.
+        names.append("httparena-tls")
+        routes.append(_http_route(names[-1], TLS_LISTEN, http_workers, tls_block))
+        # JSON over HTTP/1.1 + TLS on 8081 (json-tls): the same `/json` handler,
+        # but the port advertises ALPN `http/1.1` only so the wrk load generator
+        # negotiates HTTP/1.1 rather than upgrading to h2.
+        names.append("httparena-json-tls")
+        routes.append(
+            _http_route(
+                names[-1],
+                H1TLS_LISTEN,
+                http_workers,
+                tls_block + "\n        server_protocol: http1_only",
+            )
+        )
+
+    return "routes:\n" + "\n".join(routes), names
+
+
 # Static assets are pre-gzipped once at startup (see CachedBody) and the reply
 # carries `content-encoding: gzip` when the client accepts it — mq-bridge honors
 # that and skips re-compressing them per request. Dynamic `/json` responses are
@@ -298,16 +356,34 @@ def handle(message: Message) -> Message:
     return _reply(message, b"Not Found", NOT_FOUND_META)
 
 
+def _run_secondary_listener(route: Route) -> None:
+    try:
+        route.run()
+    finally:
+        os.kill(os.getpid(), signal.SIGTERM)
+
+
 def _run_worker(http_workers: int) -> None:
     # Per-process setup: the Postgres pool (background threads) and the Rust
     # runtime must be created AFTER any fork, never inherited across it.
     global _POOL
     _POOL = _init_pool()
+    config, names = _config(http_workers)
     with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as f:
-        f.write(_config(http_workers))
+        f.write(config)
         config_path = f.name
-    route = Route.from_yaml(config_path, "httparena").with_handler(handle)
-    route.run()
+
+    routes = [Route.from_yaml(config_path, name).with_handler(handle) for name in names]
+    # Keep every port fail-fast: if any secondary listener exits, signal this
+    # worker so the parent supervisor restarts a clean set instead of leaving a
+    # partially serving process behind.
+    for route in routes[1:]:
+        threading.Thread(
+            target=_run_secondary_listener,
+            args=(route,),
+            daemon=False,
+        ).start()
+    routes[0].run()
 
 
 def _worker_count() -> int:

@@ -1628,7 +1628,7 @@ dependencies = [
 [[package]]
 name = "mq-bridge"
 version = "0.2.19"
-source = "git+https://github.com/marcomq/mq-bridge?branch=dev#9b89e04b19da15238f26709233325ad6cc2b7db3"
+source = "git+https://github.com/marcomq/mq-bridge?branch=dev#c218c74690fccdb142ac9efd9210624cecbeca6c"
 dependencies = [
  "anyhow",
  "arc-swap",

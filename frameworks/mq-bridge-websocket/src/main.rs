@@ -1,20 +1,13 @@
 //! HttpArena WebSocket echo server for mq-bridge (Rust).
 //!
 //! Accepts WebSocket upgrades on `0.0.0.0:8080` at path `/ws` and echoes each
-//! inbound frame back on the same connection (the `echo-ws` profile).
+//! inbound frame back on the same connection (the `echo-ws` profiles).
 //!
-//! The route is `websocket -> response`: mq-bridge's WebSocket consumer turns
-//! each inbound frame into a `CanonicalMessage` (tagging text/binary in the
-//! `ws_message_type` metadata), the handler returns that payload unchanged, and
-//! the Response output sends it back as a Reply on the originating socket. The
-//! reply honours `ws_message_type`, so text stays text and binary stays binary.
+//! The route is `websocket -> response`: mq-bridge's direct WebSocket path
+//! echoes each inbound text/binary frame back on the originating socket.
 
 use mq_bridge::models::{Endpoint, EndpointType, WebSocketConfig, WebSocketExecutionMode};
-use mq_bridge::{CanonicalMessage, Handled, HandlerError, Route};
-
-async fn echo(msg: CanonicalMessage) -> Result<Handled, HandlerError> {
-    Ok(Handled::Publish(msg))
-}
+use mq_bridge::Route;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -27,7 +20,7 @@ async fn main() -> anyhow::Result<()> {
 
     let output = Endpoint::new_response();
 
-    let route = Route::new(input, output).with_handler(echo);
+    let route = Route::new(input, output);
     let handle = route.run("httparena-ws").await?;
     handle.join().await?;
     Ok(())

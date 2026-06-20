@@ -286,7 +286,21 @@ def _reply(request: Message, body: bytes, metadata: dict[str, str]) -> Message:
 
 
 def _accepts_gzip(message: Message) -> bool:
-    return "gzip" in message.metadata.get("accept-encoding", "").lower()
+    header = message.metadata.get("accept-encoding", "").lower()
+    for directive in header.split(","):
+        token, _, params = directive.strip().partition(";")
+        if token != "gzip":
+            continue
+        # Honour an explicit q-value: q=0 means "not acceptable".
+        for param in params.split(";"):
+            key, _, value = param.strip().partition("=")
+            if key == "q":
+                try:
+                    return float(value) > 0
+                except ValueError:
+                    return False
+        return True
+    return False
 
 
 def _load_static_cache() -> dict[str, CachedBody]:

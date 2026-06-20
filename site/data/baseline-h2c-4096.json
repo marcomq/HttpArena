@@ -76,25 +76,6 @@
     "status_5xx": 0
   },
   {
-    "framework": "mq-bridge",
-    "language": "Rust",
-    "rps": 434197,
-    "avg_latency": "767.34ms",
-    "p99_latency": "3.46s",
-    "cpu": "4599.5%",
-    "memory": "2.4GiB",
-    "connections": 4096,
-    "threads": 64,
-    "duration": "5s",
-    "pipeline": 1,
-    "bandwidth": "22.40MB/s",
-    "reconnects": 0,
-    "status_2xx": 2214409,
-    "status_3xx": 0,
-    "status_4xx": 0,
-    "status_5xx": 0
-  },
-  {
     "framework": "quarkus-jvm",
     "language": "Java",
     "rps": 6109902,

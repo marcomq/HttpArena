@@ -15,7 +15,7 @@ name = "httparena-mqbridge-ws"
 path = "src/main.rs"
 
 [dependencies]
-mq-bridge = { git = "https://github.com/marcomq/mq-bridge", branch = "dev", default-features = false, features = ["websocket"] }
+mq-bridge = { git = "https://github.com/marcomq/mq-bridge", rev = "47a1f10cfe95e4ca6a07df13402ce70583f680d7", default-features = false, features = ["websocket"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 anyhow = "1"
 

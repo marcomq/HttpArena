@@ -346,25 +346,6 @@
     "status_5xx": 0
   },
   {
-    "framework": "mq-bridge",
-    "language": "Rust",
-    "rps": 1089541,
-    "avg_latency": "14.80ms",
-    "p99_latency": "16.90ms",
-    "cpu": "2041.4%",
-    "memory": "446MiB",
-    "connections": 16384,
-    "threads": 64,
-    "duration": "5s",
-    "pipeline": 1,
-    "bandwidth": "7.67MB/s",
-    "reconnects": 0,
-    "status_2xx": 5447709,
-    "status_3xx": 0,
-    "status_4xx": 0,
-    "status_5xx": 0
-  },
-  {
     "framework": "node-websocket",
     "language": "JS",
     "rps": 1831732,

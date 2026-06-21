@@ -560,6 +560,26 @@
     "status_5xx": 0
   },
   {
+    "framework": "mq-bridge-py",
+    "language": "Python",
+    "rps": 126441,
+    "avg_latency": "127.03ms",
+    "p99_latency": "287.50ms",
+    "cpu": "6229.5%",
+    "memory": "5.7GiB",
+    "connections": 16384,
+    "threads": 64,
+    "duration": "5s",
+    "pipeline": 1,
+    "bandwidth": "223.00MB/s",
+    "input_bw": "9.41MB/s",
+    "reconnects": 17089,
+    "status_2xx": 632205,
+    "status_3xx": 0,
+    "status_4xx": 0,
+    "status_5xx": 0
+  },
+  {
     "framework": "ngx-php",
     "language": "PHP",
     "rps": 522125,

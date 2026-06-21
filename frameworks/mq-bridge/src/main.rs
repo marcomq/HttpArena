@@ -34,6 +34,7 @@
 //! `json-h2c` profiles from the same handlers.
 
 use bytes::Bytes;
+use mq_bridge::endpoints::http::{guess_content_type, HttpRequestExt, HTTP_STATUS_CODE};
 use mq_bridge::models::{Endpoint, EndpointType, HttpConfig, HttpServerProtocol, TlsConfig};
 use mq_bridge::{CanonicalMessage, Handled, HandlerError, Route};
 use serde::{Deserialize, Serialize};
@@ -144,13 +145,6 @@ fn gzip(data: &[u8]) -> Bytes {
     Bytes::from(encoder.finish().expect("gzip finish"))
 }
 
-/// Whether the client advertised it can decode gzip (header captured in metadata).
-fn accepts_gzip(msg: &CanonicalMessage) -> bool {
-    msg.metadata
-        .get("accept-encoding")
-        .is_some_and(|v| v.to_ascii_lowercase().contains("gzip"))
-}
-
 fn load_static(dir: &Path) -> HashMap<String, CachedBody> {
     let mut cache = HashMap::new();
     let Ok(entries) = std::fs::read_dir(dir) else {
@@ -162,7 +156,7 @@ fn load_static(dir: &Path) -> HashMap<String, CachedBody> {
         }
         let name = entry.file_name().to_string_lossy().into_owned();
         if let Ok(bytes) = std::fs::read(entry.path()) {
-            let content_type = content_type_for(&name);
+            let content_type = guess_content_type(&name);
             cache.insert(name, CachedBody::build(bytes, content_type));
         }
     }
@@ -194,15 +188,7 @@ fn json(body: Vec<u8>) -> CanonicalMessage {
 }
 
 fn status(status: u16, body: &str) -> CanonicalMessage {
-    text(body.to_string()).with_metadata_kv("http_status_code", status.to_string())
-}
-
-/// Look up an integer query parameter (`a`, `b`, `m`, `min`, `max`, `limit`).
-fn query_int(query: &str, key: &str) -> Option<i64> {
-    query
-        .split('&')
-        .find_map(|pair| pair.strip_prefix(key).and_then(|r| r.strip_prefix('=')))
-        .and_then(|v| v.parse::<i64>().ok())
+    text(body.to_string()).with_metadata_kv(HTTP_STATUS_CODE, status.to_string())
 }
 
 // ---------- handlers ----------
@@ -229,10 +215,10 @@ fn build_json(dataset: &[DatasetItem], count: usize, m: i64) -> Vec<u8> {
     serde_json::to_vec(&JsonResponse { count, items }).unwrap_or_default()
 }
 
-async fn async_db(pool: &PgPool, query: &str) -> CanonicalMessage {
-    let min = query_int(query, "min").unwrap_or(10) as i32;
-    let max = query_int(query, "max").unwrap_or(50) as i32;
-    let limit = query_int(query, "limit").unwrap_or(50).clamp(1, 50);
+async fn async_db(pool: &PgPool, msg: &CanonicalMessage) -> CanonicalMessage {
+    let min = msg.query_int("min").unwrap_or(10) as i32;
+    let max = msg.query_int("max").unwrap_or(50) as i32;
+    let limit = msg.query_int("limit").unwrap_or(50).clamp(1, 50);
 
     let rows = sqlx::query(
         "SELECT id, name, category, price, quantity, active, tags, rating_score, rating_count \
@@ -273,19 +259,6 @@ async fn async_db(pool: &PgPool, query: &str) -> CanonicalMessage {
     json(serde_json::to_vec(&body).unwrap_or_default())
 }
 
-fn content_type_for(name: &str) -> &'static str {
-    match name.rsplit_once('.').map(|(_, ext)| ext) {
-        Some("js") => "application/javascript",
-        Some("css") => "text/css",
-        Some("html") => "text/html",
-        Some("json") => "application/json",
-        Some("woff2") => "font/woff2",
-        Some("png") => "image/png",
-        Some("svg") => "image/svg+xml",
-        _ => "application/octet-stream",
-    }
-}
-
 fn serve_static(state: &AppState, name: &str, want_gzip: bool) -> CanonicalMessage {
     // Reject path traversal: the filename must be a single normal component.
     let candidate = Path::new(name);
@@ -309,19 +282,16 @@ fn serve_json(state: &AppState, count: usize, m: i64) -> CanonicalMessage {
 }
 
 async fn handle(state: Arc<AppState>, msg: CanonicalMessage) -> Result<Handled, HandlerError> {
-    let method = msg.metadata.get("http_method").map(String::as_str).unwrap_or("");
-    let path = msg.metadata.get("http_path").map(String::as_str).unwrap_or("");
-    let query = msg.metadata.get("http_query").map(String::as_str).unwrap_or("");
-    let want_gzip = accepts_gzip(&msg);
+    let want_gzip = msg.accepts_gzip();
 
-    let out = match (method, path) {
+    let out = match (msg.http_method(), msg.http_path()) {
         ("GET", "/pipeline") => text("ok".to_string()),
         ("GET", "/baseline11") | ("GET", "/baseline2") => {
-            let sum = query_int(query, "a").unwrap_or(0) + query_int(query, "b").unwrap_or(0);
+            let sum = msg.query_int("a").unwrap_or(0) + msg.query_int("b").unwrap_or(0);
             text(sum.to_string())
         }
         ("POST", "/baseline11") => {
-            let mut sum = query_int(query, "a").unwrap_or(0) + query_int(query, "b").unwrap_or(0);
+            let mut sum = msg.query_int("a").unwrap_or(0) + msg.query_int("b").unwrap_or(0);
             if let Ok(s) = std::str::from_utf8(&msg.payload) {
                 if let Ok(n) = s.trim().parse::<i64>() {
                     sum += n;
@@ -331,12 +301,12 @@ async fn handle(state: Arc<AppState>, msg: CanonicalMessage) -> Result<Handled, 
         }
         ("POST", "/upload") => text(msg.payload.len().to_string()),
         ("GET", "/async-db") => match &state.pool {
-            Some(pool) => async_db(pool, query).await,
+            Some(pool) => async_db(pool, &msg).await,
             None => json(br#"{"items":[],"count":0}"#.to_vec()),
         },
         ("GET", p) if p.starts_with("/json/") => {
             let count: usize = p["/json/".len()..].parse().unwrap_or(0);
-            let m = query_int(query, "m").unwrap_or(1);
+            let m = msg.query_int("m").unwrap_or(1);
             serve_json(&state, count, m)
         }
         ("GET", p) if p.starts_with("/static/") => {

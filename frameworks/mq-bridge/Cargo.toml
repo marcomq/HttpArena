@@ -20,7 +20,7 @@ path = "src/main.rs"
 
 [dependencies]
 # `rustls-ring` selects the ring crypto provider for the TLS (8443) listener.
-mq-bridge = { git = "https://github.com/marcomq/mq-bridge", rev = "bf283456cb391321fea6504a13961db31007db95", default-features = false, features = ["http", "rustls-ring"] }
+mq-bridge = { git = "https://github.com/marcomq/mq-bridge", tag = "v0.2.21", default-features = false, features = ["http", "rustls-ring"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "fs"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

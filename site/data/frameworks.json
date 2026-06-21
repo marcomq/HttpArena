@@ -476,7 +476,7 @@
   },
   "mq-bridge-py": {
     "dir": "mq-bridge-py",
-    "description": "mq-bridge Python bindings (mq_bridge_py). A single http->response route serves the cleartext HTTP/1.1 + h2c profiles; HTTP framing stays in Rust and the inline-response fast path keeps responses off the GIL, so the Python handler runs only the per-request dispatch.",
+    "description": "mq-bridge Python bindings (mq_bridge_py). A single http->response route dispatches on request metadata while HTTP framing stays in Rust; cleartext HTTP/1.1 + h2c run on 8080/8082, optional TLS listeners serve HTTP/2 on 8443 and HTTP/1.1 on 8081, and the inline-response fast path keeps responses off the GIL so the Python handler runs only the per-request dispatch.",
     "repo": "https://github.com/marcomq/mq-bridge",
     "type": "emerging",
     "engine": "mq-bridge",
@@ -492,7 +492,7 @@
     "variants": [
       {
         "dir": "mq-bridge-websocket",
-        "description": "mq-bridge WebSocket echo server. A websocket->response route echoes each inbound frame back on the same connection via the route's Reply disposition; text/binary frame type is preserved through ws_message_type metadata.",
+        "description": "mq-bridge WebSocket echo server. A websocket->response route echoes each inbound text/binary frame back on the same connection via the direct WebSocket response path.",
         "repo": "https://github.com/marcomq/mq-bridge",
         "type": "emerging",
         "engine": "mq-bridge",

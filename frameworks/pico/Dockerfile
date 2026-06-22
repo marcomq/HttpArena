@@ -2,16 +2,21 @@ FROM debian:stable-slim AS build
 
 RUN apt-get -qq update && \
     apt-get -qy install --no-install-recommends \
-        ca-certificates curl unzip build-essential && \
+        ca-certificates git build-essential && \
     rm -rf /var/lib/apt/lists/*
 
-# Pinned, reproducible V 0.5.1 (prebuilt release binary).
-RUN curl -fsSL https://github.com/vlang/v/releases/download/0.5.1/v_linux.zip -o /tmp/v.zip && \
-    unzip -q /tmp/v.zip -d /opt && rm /tmp/v.zip && \
-    ln -s /opt/v/v /usr/local/bin/v
+# Pinned, reproducible V at master commit c0624b274 (built from source), keeping the
+# V frameworks on one toolchain. `make` bootstraps via the matching vc; if a much
+# later rebuild ever fails to bootstrap, pin vlang/vc to the commit cut for this V.
+RUN git clone https://github.com/vlang/v /opt/v && \
+    cd /opt/v && git checkout c0624b274 && \
+    make && ln -s /opt/v/v /usr/local/bin/v
 
 WORKDIR /app
 COPY . .
+# Default GC (NOT -gc none). picoev is not part of the veb/fasthttp `-prealloc`
+# per-request-arena integration, so -prealloc would accumulate memory under load;
+# the default garbage collector is the safe choice here.
 RUN v -prod . -o server
 
 FROM debian:stable-slim

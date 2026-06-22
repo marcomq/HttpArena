@@ -14,7 +14,7 @@ process per core shares the listen socket via `SO_REUSEPORT`.
 
 ## Stack
 
-* [V](https://vlang.io) 0.5.1 (pinned prebuilt release)
+* [V](https://vlang.io) — pinned master commit `c0624b274` (built from source), default GC
 * [picoev](https://modules.vlang.io/picoev.html) + [picohttpparser](https://modules.vlang.io/picohttpparser.html)
 
 JSON is serialized manually (precomputed prefixes + `strings.Builder`), no

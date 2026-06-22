@@ -849,6 +849,25 @@
     "status_5xx": 0
   },
   {
+    "framework": "mq-bridge",
+    "language": "Rust",
+    "rps": 5085734,
+    "avg_latency": "12.89ms",
+    "p99_latency": "43.70ms",
+    "cpu": "6498.8%",
+    "memory": "165MiB",
+    "connections": 4096,
+    "threads": 64,
+    "duration": "5s",
+    "pipeline": 16,
+    "bandwidth": "833.94MB/s",
+    "reconnects": 0,
+    "status_2xx": 25428672,
+    "status_3xx": 0,
+    "status_4xx": 0,
+    "status_5xx": 0
+  },
+  {
     "framework": "mq-bridge-py",
     "language": "Python",
     "rps": 2754528,

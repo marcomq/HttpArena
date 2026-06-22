@@ -5,34 +5,28 @@ RUN apt-get -qq update && \
         ca-certificates build-essential git libpq-dev liburing-dev && \
     rm -rf /var/lib/apt/lists/*
 
-# Pinned, reproducible V 0.5.1, built from source. Plain `make` can't build an old
-# tag — its `latest_vc` step `git pull`s the newest vlang/vc bootstrap, which no
-# longer matches 0.5.1's vlib ("unknown ident `native`"). So pin the vc bootstrap
-# to the commit cut for 0.5.1 (vlang/vc f461dfeb = "[v:master] 0c3183c - V 0.5.1")
-# and run make's own bootstrap recipe (cc -> v1 -> v2 -> v). Pinned by tag, not a
-# master commit, because post-0.5.1 master has a codegen regression (single-element
-# array push 4-7x slower, vlang/v#27468).
-RUN git clone --branch 0.5.1 --depth 1 https://github.com/vlang/v /opt/v && \
-    git clone --filter=blob:none --quiet https://github.com/vlang/vc /opt/v/vc && \
-    git -C /opt/v/vc checkout -q f461dfebcdfa && \
-    git clone --filter=blob:none --quiet --branch thirdparty-linux-amd64 \
-        https://github.com/vlang/tccbin /opt/v/thirdparty/tcc && \
-    cd /opt/v && \
-    cc -std=c99 -w -o v1 vc/v.c -lm -lpthread && \
-    ./v1 -no-parallel -o v2 cmd/v && \
-    ./v2 -nocache -o v cmd/v && \
-    rm -f v1 v2 && \
-    ln -s /opt/v/v /usr/local/bin/v
+# Pinned, reproducible V at master commit c0624b274 (built from source). Master is
+# now preferred over the 0.5.1 tag: the codegen regression that forced 0.5.1 (single-
+# element array push 4-7x slower, vlang/v#27468) is fixed (vlang/v#27470), and the
+# code uses the modern pooled Go-style db.pg (vlang/v#27265). For a current master
+# commit, `make` bootstraps via the matching vc; if a much later rebuild ever fails
+# to bootstrap, pin vlang/vc to the commit cut for this V.
+RUN git clone https://github.com/vlang/v /opt/v && \
+    cd /opt/v && git checkout c0624b274 && \
+    make && ln -s /opt/v/v /usr/local/bin/v
 
-# Install the vanilla HTTP server as the `vanilla` module (import vanilla.http_server).
-# The ADD fetches vanilla's main ref first, so Docker invalidates this layer's
-# cache whenever main moves — otherwise the clone layer is cached indefinitely and
-# the build never picks up upstream library fixes.
-ADD https://api.github.com/repos/enghitalo/vanilla/git/refs/heads/main /tmp/vanilla-main-ref.json
-RUN git clone --depth 1 https://github.com/enghitalo/vanilla /root/.vmodules/vanilla
+# Install the vanilla HTTP server as the `vanilla` module (import vanilla.http_server),
+# pinned to a specific commit: reproducible, with NO per-build network call to detect
+# changes. The previous approach `ADD`ed the GitHub API main-ref URL to cache-bust when
+# main moved, but that hit api.github.com every build and a transient 504/rate-limit
+# failed the whole build (MDA2AV/HttpArena#895). Bump this commit to pick up lib fixes.
+RUN git clone https://github.com/enghitalo/vanilla /root/.vmodules/vanilla && \
+    git -C /root/.vmodules/vanilla checkout a7f22dab29f012b44d36b1e1cae6bda82166ad30
 
 WORKDIR /app
 COPY . .
+# Default GC (NOT -gc none, NOT -prealloc): this runs on the vanilla HTTP server's own
+# manual buffer management, not the stdlib veb/fasthttp per-request arena.
 RUN v -prod . -o server
 
 FROM debian:stable-slim

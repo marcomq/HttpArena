@@ -35,7 +35,7 @@ struct DbItem {
 
 struct App {
 mut:
-	pool     pg.ConnectionPool
+	db       &pg.DB = unsafe { nil }
 	dataset  []DatasetItem
 	prefixes []string // per item: `{…,"total":`
 }
@@ -78,8 +78,8 @@ pub fn (mut app App) json_ep(mut ctx Context, count int) veb.Result {
 
 @['/async-db']
 pub fn (mut app App) async_db_ep(mut ctx Context) veb.Result {
-	return ctx.send_response_to_client('application/json', app.async_db(qint(ctx.query, 'min'),
-		qint(ctx.query, 'max'), qint(ctx.query, 'limit')))
+	return ctx.send_response_to_client('application/json', app.async_db(qint(ctx.query, 'min'), qint(ctx.query,
+		'max'), qint(ctx.query, 'limit')))
 }
 
 // json_body manually serializes the first `count` dataset items (no reflection):
@@ -109,13 +109,14 @@ fn (mut app App) async_db(min i64, max i64, limit i64) string {
 	if lim > 50 {
 		lim = 50
 	}
-	mut conn := app.pool.acquire() or { return '{"items":[],"count":0}' }
-	rows := conn.exec_param_many('SELECT id, name, category, price, quantity, active, tags, rating_score, rating_count FROM items WHERE price BETWEEN \$1 AND \$2 LIMIT \$3',
-		[min.str(), max.str(), lim.str()]) or {
-		app.pool.release(conn)
-		return '{"items":[],"count":0}'
-	}
-	app.pool.release(conn)
+	// db is pool-backed (Go-style db.pg): exec_param_many transparently acquires a
+	// conn for the call and releases it back to the pool — no manual acquire/release.
+	mut db := app.db
+	rows := db.exec_param_many('SELECT id, name, category, price, quantity, active, tags, rating_score, rating_count FROM items WHERE price BETWEEN \$1 AND \$2 LIMIT \$3', [
+		min.str(),
+		max.str(),
+		lim.str(),
+	]) or { return '{"items":[],"count":0}' }
 	mut items := []DbItem{cap: rows.len}
 	for row in rows {
 		items << DbItem{
@@ -194,7 +195,11 @@ fn main() {
 	if size > 200 {
 		size = 200
 	}
-	mut pool := pg.new_connection_pool(parse_db_url(url), size)!
+	// max_idle_conns MUST equal max_open_conns: db.pg defaults idle to 2, so any conn
+	// released beyond the 2nd is physically closed and the next acquire pays a full PG
+	// connect handshake — connection churn on every concurrent DB request. Keeping
+	// idle == open makes it a fixed warm pool.
+	mut db := pg.connect(parse_db_url(url), pg.PoolConfig{ max_open_conns: size, max_idle_conns: size })!
 
 	dataset_path := os.getenv_opt('DATASET_PATH') or { '/data/dataset.json' }
 	dataset := json.decode([]DatasetItem, os.read_file(dataset_path) or { '[]' }) or {
@@ -207,7 +212,7 @@ fn main() {
 	}
 
 	mut app := &App{
-		pool:     pool
+		db:       db
 		dataset:  dataset
 		prefixes: prefixes
 	}

@@ -18,15 +18,15 @@ backend. The harness runs it with `--security-opt seccomp=unconfined` and
 | `json` | `GET /json/{count}?m=M` | single-allocation response, precomputed item prefixes |
 | `json-comp` | `GET /json/...` + `Accept-Encoding` | gzip-compressed response |
 | `static` | `GET /static/<file>` | assets preloaded into memory, MIME by extension, 404 on miss |
-| `async-db` | `GET /async-db?min&max&limit` | `db.pg` ConnectionPool |
+| `async-db` | `GET /async-db?min&max&limit` | `db.pg` pooled Go-style DB |
 | `crud` | `GET/POST/PUT /crud/items[/id]` | list + read + create + update; in-memory cache-aside (`X-Cache` MISS/HIT, invalidated on update — no Redis) |
 | `fortunes` | `GET /fortunes` | DB rows + runtime row, HTML-escaped |
 | `api-4`, `api-16` | mixed baseline + json + async-db | |
 
 ## Stack
 
-* [V](https://vlang.io) 0.5.1 (pinned prebuilt release)
-* [vanilla](https://github.com/enghitalo/vanilla) — raw io_uring HTTP server
+* [V](https://vlang.io) — pinned master commit `c0624b274` (built from source), default GC
+* [vanilla](https://github.com/enghitalo/vanilla) — raw io_uring HTTP server (pinned commit)
 * `db.pg`, `json`, `compress.gzip` (stdlib)
 
 ## Environment

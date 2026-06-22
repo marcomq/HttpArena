@@ -54,9 +54,9 @@ struct StaticFile {
 
 struct Shared {
 mut:
-	pool     pg.ConnectionPool
+	db       &pg.DB = unsafe { nil }
 	dataset  []DatasetItem
-	prefixes []string // per item: `{…,"total":` (everything but the request-dependent total)
+	prefixes []string              // per item: `{…,"total":` (everything but the request-dependent total)
 	assets   map[string]StaticFile // /static/<name> -> prebuilt response
 	cache    map[int]string        // crud cache-aside: id -> item JSON
 	cache_mu &sync.RwMutex = unsafe { nil }
@@ -152,8 +152,8 @@ fn handle(req_buffer []u8, _fd int, mut out []u8, mut sh Shared) ! {
 			sh.write_json_response(mut out, count, m)
 		}
 	} else if route == '/async-db' {
-		write_resp(mut out, 'application/json', sh.async_db(qint(req, qk_min), qint(req, qk_max),
-			qint(req, qk_limit)))
+		write_resp(mut out, 'application/json', sh.async_db(qint(req, qk_min), qint(req, qk_max), qint(req,
+			qk_limit)))
 	} else if route == '/fortunes' {
 		write_resp(mut out, 'text/html; charset=utf-8', sh.fortunes())
 	} else if route.starts_with('/static/') {
@@ -194,16 +194,17 @@ fn (mut sh Shared) crud_list(category string, page i64, limit i64) []u8 {
 		lim = 100
 	}
 	offset := (p - 1) * lim
-	mut conn := sh.pool.acquire() or { return ok('application/json', '{"items":[],"total":0,"page":1}') }
-	rows := conn.exec_param_many('SELECT id, name, category, price, quantity, active, tags, rating_score, rating_count FROM items WHERE category = \$1 ORDER BY id LIMIT \$2 OFFSET \$3',
-		[category, lim.str(), offset.str()]) or {
-		sh.pool.release(conn)
-		return ok('application/json', '{"items":[],"total":0,"page":1}')
-	}
-	trows := conn.exec_param_many('SELECT count(*) FROM items WHERE category = \$1', [category]) or {
-		[]
-	}
-	sh.pool.release(conn)
+	// db is pool-backed (Go-style db.pg): each exec_param_many transparently acquires
+	// a pooled conn for the call and releases it — no manual acquire/release.
+	mut db := sh.db
+	rows := db.exec_param_many('SELECT id, name, category, price, quantity, active, tags, rating_score, rating_count FROM items WHERE category = \$1 ORDER BY id LIMIT \$2 OFFSET \$3', [
+		category,
+		lim.str(),
+		offset.str(),
+	]) or { return ok('application/json', '{"items":[],"total":0,"page":1}') }
+	trows := db.exec_param_many('SELECT count(*) FROM items WHERE category = \$1', [
+		category,
+	]) or { [] }
 	total := if trows.len > 0 { nn(trows[0].vals[0]).int() } else { 0 }
 	mut items := []DbItem{cap: rows.len}
 	for row in rows {
@@ -229,13 +230,10 @@ fn (mut sh Shared) crud_get(id int) []u8 {
 	if cached.len > 0 {
 		return ok_xcache('application/json', cached, 'HIT')
 	}
-	mut conn := sh.pool.acquire() or { return not_found }
-	rows := conn.exec_param_many('SELECT id, name, category, price, quantity, active, tags, rating_score, rating_count FROM items WHERE id = \$1',
-		[id.str()]) or {
-		sh.pool.release(conn)
-		return not_found
-	}
-	sh.pool.release(conn)
+	mut db := sh.db
+	rows := db.exec_param_many('SELECT id, name, category, price, quantity, active, tags, rating_score, rating_count FROM items WHERE id = \$1', [
+		id.str(),
+	]) or { return not_found }
 	if rows.len == 0 {
 		return not_found
 	}
@@ -250,13 +248,14 @@ fn (mut sh Shared) crud_get(id int) []u8 {
 fn (mut sh Shared) crud_create(req request_parser.HttpRequest) []u8 {
 	raw := unsafe { tos(&req.buffer[req.body.start], req.body.len) }
 	c := json.decode(CrudCreate, raw) or { return bad_request }
-	mut conn := sh.pool.acquire() or { return bad_request }
-	conn.exec_param_many("INSERT INTO items (id, name, category, price, quantity, active, tags, rating_score, rating_count) VALUES (\$1, \$2, \$3, \$4, \$5, true, '[]', 0, 0) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, category = EXCLUDED.category, price = EXCLUDED.price, quantity = EXCLUDED.quantity",
-		[c.id.str(), c.name, c.category, c.price.str(), c.quantity.str()]) or {
-		sh.pool.release(conn)
-		return bad_request
-	}
-	sh.pool.release(conn)
+	mut db := sh.db
+	db.exec_param_many("INSERT INTO items (id, name, category, price, quantity, active, tags, rating_score, rating_count) VALUES (\$1, \$2, \$3, \$4, \$5, true, '[]', 0, 0) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, category = EXCLUDED.category, price = EXCLUDED.price, quantity = EXCLUDED.quantity", [
+		c.id.str(),
+		c.name,
+		c.category,
+		c.price.str(),
+		c.quantity.str(),
+	]) or { return bad_request }
 	return created
 }
 
@@ -264,13 +263,14 @@ fn (mut sh Shared) crud_create(req request_parser.HttpRequest) []u8 {
 fn (mut sh Shared) crud_update(id int, req request_parser.HttpRequest) []u8 {
 	raw := unsafe { tos(&req.buffer[req.body.start], req.body.len) }
 	c := json.decode(CrudCreate, raw) or { return bad_request }
-	mut conn := sh.pool.acquire() or { return bad_request }
-	conn.exec_param_many('UPDATE items SET name = \$2, category = \$3, price = \$4, quantity = \$5 WHERE id = \$1',
-		[id.str(), c.name, c.category, c.price.str(), c.quantity.str()]) or {
-		sh.pool.release(conn)
-		return bad_request
-	}
-	sh.pool.release(conn)
+	mut db := sh.db
+	db.exec_param_many('UPDATE items SET name = \$2, category = \$3, price = \$4, quantity = \$5 WHERE id = \$1', [
+		id.str(),
+		c.name,
+		c.category,
+		c.price.str(),
+		c.quantity.str(),
+	]) or { return bad_request }
 	sh.cache_mu.@lock()
 	sh.cache.delete(id)
 	sh.cache_mu.unlock()
@@ -304,7 +304,8 @@ const bad_request = 'HTTP/1.1 400 Bad Request\r\nServer: vanilla\r\nContent-Leng
 // Only `total` (price*quantity*m) varies per request; the rest is a precomputed
 // prefix. Content-Length is computed up front so everything lands in one buffer.
 fn (sh &Shared) write_json_response(mut out []u8, count int, m i64) {
-	mut clen := 21 + digits(i64(count)) // len('{"items":[') + len('],"count":') + '}' + count digits
+	// 21 = len('{"items":[') + len('],"count":') + '}', plus the count's own digits
+	mut clen := 21 + digits(i64(count))
 	if count > 0 {
 		clen += count - 1 // item separators
 	}
@@ -312,7 +313,8 @@ fn (sh &Shared) write_json_response(mut out []u8, count int, m i64) {
 		t := sh.dataset[i].price * sh.dataset[i].quantity * m
 		clen += sh.prefixes[i].len + digits(t) + 1 // prefix + total + '}'
 	}
-	ws(mut out, 'HTTP/1.1 200 OK\r\nServer: vanilla\r\nContent-Type: application/json\r\nContent-Length: ')
+	ws(mut out,
+		'HTTP/1.1 200 OK\r\nServer: vanilla\r\nContent-Type: application/json\r\nContent-Length: ')
 	wi(mut out, i64(clen))
 	ws(mut out, '\r\nConnection: keep-alive\r\n\r\n{"items":[')
 	for i in 0 .. count {
@@ -347,7 +349,8 @@ fn (mut sh Shared) write_json_gzip(mut out []u8, count int, m i64) {
 		return
 	}
 	mut resp := []u8{cap: gz.len + 128}
-	ws(mut resp, 'HTTP/1.1 200 OK\r\nServer: vanilla\r\nContent-Encoding: gzip\r\nContent-Type: application/json\r\nContent-Length: ')
+	ws(mut resp,
+		'HTTP/1.1 200 OK\r\nServer: vanilla\r\nContent-Encoding: gzip\r\nContent-Type: application/json\r\nContent-Length: ')
 	wi(mut resp, i64(gz.len))
 	ws(mut resp, '\r\nConnection: keep-alive\r\n\r\n')
 	unsafe { resp.push_many(gz.data, gz.len) }
@@ -382,11 +385,8 @@ fn (sh &Shared) json_body(count int, m i64) string {
 // and renders the HTML table (escaped). 199 seeded + 1 runtime + header = 201 <tr>.
 fn (mut sh Shared) fortunes() string {
 	mut fortunes := []Fortune{}
-	mut conn := sh.pool.acquire() or {
-		return '<!doctype html><html><body><table></table></body></html>'
-	}
-	rows := conn.exec_param_many('SELECT id, message FROM fortune', []) or { [] }
-	sh.pool.release(conn)
+	mut db := sh.db
+	rows := db.exec_param_many('SELECT id, message FROM fortune', []) or { [] }
 	for row in rows {
 		fortunes << Fortune{
 			id:      nn(row.vals[0]).int()
@@ -461,24 +461,15 @@ fn (mut sh Shared) async_db(min i64, max i64, limit i64) string {
 	if lim > 50 {
 		lim = 50
 	}
-	mut conn := sh.pool.acquire() or { return '{"items":[],"count":0}' }
-	// Prepared statement: PostgreSQL parses the SQL once per connection instead of
-	// on every request (exec_param_many re-parses each call). Lazily prepare on the
-	// connection's first use — prepared statements are per-session and the pool
-	// reuses sessions, so after warmup every connection serves exec_prepared.
+	// db is pool-backed (Go-style db.pg): exec_param_many transparently acquires a
+	// pooled conn per call. (The old per-conn lazily-prepared statement isn't a clean
+	// fit for the transparent pool — prepared statements are session-scoped, and the
+	// pool hands out a transient conn per call; re-add via db.conn() pinning if the
+	// async-db per-call re-parse cost ever matters.)
+	mut db := sh.db
 	adb_params := [min.str(), max.str(), lim.str()]
-	rows := conn.exec_prepared('vanilla_async_db', adb_params) or {
-		conn.prepare('vanilla_async_db', 'SELECT id, name, category, price, quantity, active, tags, rating_score, rating_count FROM items WHERE price BETWEEN \$1 AND \$2 LIMIT \$3',
-			3) or {
-			sh.pool.release(conn)
-			return '{"items":[],"count":0}'
-		}
-		conn.exec_prepared('vanilla_async_db', adb_params) or {
-			sh.pool.release(conn)
-			return '{"items":[],"count":0}'
-		}
-	}
-	sh.pool.release(conn)
+	rows := db.exec_param_many('SELECT id, name, category, price, quantity, active, tags, rating_score, rating_count FROM items WHERE price BETWEEN \$1 AND \$2 LIMIT \$3',
+		adb_params) or { return '{"items":[],"count":0}' }
 	mut items := []DbItem{cap: rows.len}
 	for row in rows {
 		items << DbItem{
@@ -691,7 +682,12 @@ fn main() {
 	if size > 200 {
 		size = 200 // leave headroom under Postgres max_connections
 	}
-	mut pool := pg.new_connection_pool(parse_db_url(url), size)!
+	// max_idle_conns MUST equal max_open_conns: db.pg defaults idle to 2, so any conn
+	// released beyond the 2nd is physically closed (pool.v) and the next acquire pays a
+	// full PG connect handshake. Under the arena's concurrent DB load that churns
+	// connections on every request (async-db/crud/fortunes were down 60-90%). Keeping
+	// idle == open makes it a fixed warm pool, matching the old ConnectionPool.
+	mut db := pg.connect(parse_db_url(url), pg.PoolConfig{ max_open_conns: size, max_idle_conns: size })!
 
 	dataset_path := os.getenv_opt('DATASET_PATH') or { '/data/dataset.json' }
 	dataset_raw := os.read_file(dataset_path) or { '[]' }
@@ -721,7 +717,7 @@ fn main() {
 	}
 
 	mut sh := Shared{
-		pool:     pool
+		db:       db
 		dataset:  dataset
 		prefixes: prefixes
 		assets:   assets

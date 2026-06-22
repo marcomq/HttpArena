@@ -63,11 +63,42 @@ mut:
 	// validate.sh does two GET /crud/items/42 and requires X-Cache MISS then HIT,
 	// but SO_REUSEPORT routes the two to different workers — per-worker caches MISS
 	// twice. The pool stays per-worker (no lock); only these caches are shared.
-	crud    map[int][]u8 // crud cache-aside: id -> full item response bytes
+	//
+	// crud is an id-indexed SLAB (the GET/PUT id space is the dense `{RAND:1:50000}`),
+	// not a map[int][]u8. The map version leaked under -gc none: every PUT did
+	// `map.delete(id)`, orphaning the stored buffer forever (no GC), and the next
+	// GET MISS allocated a fresh one — ~124 B/req of unfreeable growth under the
+	// arena's GET/PUT mix. The slab reuses each slot's buffer IN PLACE across
+	// re-caches and only flips `valid` on PUT (cache-aside, invalidate-on-write),
+	// so nothing is ever orphaned. Cache-aside with NO time TTL, matching the crud
+	// spec (validate.sh requires MISS→HIT then MISS-after-PUT; no expiry is checked)
+	// and the prior baseline — a 200 ms TTL was tried and forced constant DB
+	// re-queries that saturated the async pool (crud -33%, 8.8% 5xx). RSS is bounded
+	// (~25 MiB, lazily allocated).
+	crud    []CrudSlot
 	crud_mu &sync.RwMutex = unsafe { nil }
 	gz      map[u64][]u8 // json-comp: (count<<32)|m -> gzipped response bytes
 	gz_mu   &sync.RwMutex = unsafe { nil }
 }
+
+// CrudSlot is one entry of the id-indexed crud cache slab. `buf` is the rendered
+// item response body, refilled IN PLACE across re-caches (allocated once, lazily,
+// then reused — never freed/orphaned under -gc none). The entry is a valid HIT iff
+// `valid && buf.len > 0`; a PUT just sets `valid = false` and keeps the buffer for
+// the next MISS to reuse (no time-based expiry — see the SharedRO.crud note).
+struct CrudSlot {
+mut:
+	buf   []u8
+	valid bool
+}
+
+// crud GET/PUT ids are `{RAND:1:50000}`; index the slab directly (1..50000). Index 0
+// is unused; created items (`{SEQ:100001}`) fall outside and are never read-cached.
+const crud_cache_slots = 50001
+// Fixed per-slot buffer cap. The widest item renders to ~202 B (seed: name +
+// category + tags + digits + ~95 B of JSON punctuation); 512 leaves ample margin
+// so a slot's buffer, allocated once on first MISS, never reallocates.
+const crud_cache_bufcap = 512
 
 // WorkerCtx is the per-worker state handed to every handler call as ac.state
 // (the make_state contract). Each worker owns its own async Postgres pool (no
@@ -674,21 +705,28 @@ fn (mut w WorkerCtx) render_crud_list(mut out []u8, res pg_async.Result, page i6
 }
 
 fn (mut w WorkerCtx) start_crud_get(mut out []u8, mut ac core.AsyncCtx, id int) core.AsyncStep {
-	mut cached := []u8{}
-	w.ro.crud_mu.@rlock()
-	if c := w.ro.crud[id] {
-		unsafe {
-			cached = c
-		} // hold the ref (GC-alive; stored entries are never mutated in place)
+	// Cache-aside lookup against the id-indexed slab. Snapshot the cached body into
+	// the per-worker scratch UNDER the read-lock, then build the response unlocked:
+	// the slot buffer is reused in place, so a bare ref must not outlive the lock (a
+	// concurrent MISS-refill would mutate it). The read-lock hold is one memcpy.
+	mut hit := false
+	if id >= 1 && id < crud_cache_slots {
+		w.ro.crud_mu.@rlock()
+		s := w.ro.crud[id]
+		if s.valid && s.buf.len > 0 {
+			unsafe { w.scratch.len = 0 }
+			w.scratch << s.buf
+			hit = true
+		}
+		w.ro.crud_mu.runlock()
 	}
-	w.ro.crud_mu.runlock()
-	if cached.len > 0 {
+	if hit {
 		// Cache hit: answer synchronously, no DB round-trip.
 		ws(mut out,
 			'HTTP/1.1 200 OK\r\nServer: vanilla\r\nX-Cache: HIT\r\nContent-Type: application/json\r\nContent-Length: ')
-		wi(mut out, i64(cached.len))
+		wi(mut out, i64(w.scratch.len))
 		ws(mut out, '\r\nConnection: keep-alive\r\n\r\n')
-		wb(mut out, cached)
+		wb(mut out, w.scratch)
 		return .done
 	}
 	w.reset_params()
@@ -704,16 +742,33 @@ fn (mut w WorkerCtx) render_crud_get(mut out []u8, res pg_async.Result, id int) 
 		wb(mut out, not_found)
 		return
 	}
-	mut item := []u8{cap: 512}
-	render_item(mut item, row)
-	w.ro.crud_mu.@lock()
-	w.ro.crud[id] = item // populate the process-shared cache-aside
-	w.ro.crud_mu.unlock()
+	// Render the item into the per-worker scratch (reused), then publish into the
+	// id-indexed cache slot by refilling its buffer IN PLACE under the write-lock —
+	// no per-MISS allocation, nothing orphaned (the buffer is reused across re-caches;
+	// PUT only flips `valid`). Mark the slot valid (cache-aside, no time TTL).
+	unsafe { w.scratch.len = 0 }
+	render_item(mut w.scratch, row)
+	if id >= 1 && id < crud_cache_slots {
+		w.ro.crud_mu.@lock()
+		mut slot := &w.ro.crud[id]
+		if slot.buf.cap == 0 {
+			// First touch: allocate at a fixed cap ≥ the max item render (~202 B).
+			// V grows a cap-0 buffer to EXACTLY the first push length, so without this
+			// a later, slightly larger render (e.g. after a PUT) would realloc and
+			// orphan the smaller buffer forever under -gc none. Fixed cap ⇒ the refill
+			// below never reallocates; each slot allocates exactly once, ever.
+			slot.buf = []u8{cap: crud_cache_bufcap}
+		}
+		unsafe { slot.buf.len = 0 }
+		slot.buf << w.scratch
+		slot.valid = true
+		w.ro.crud_mu.unlock()
+	}
 	ws(mut out,
 		'HTTP/1.1 200 OK\r\nServer: vanilla\r\nX-Cache: MISS\r\nContent-Type: application/json\r\nContent-Length: ')
-	wi(mut out, i64(item.len))
+	wi(mut out, i64(w.scratch.len))
 	ws(mut out, '\r\nConnection: keep-alive\r\n\r\n')
-	wb(mut out, item)
+	wb(mut out, w.scratch)
 }
 
 fn (mut w WorkerCtx) start_crud_create(mut out []u8, mut ac core.AsyncCtx, req request_parser.HttpRequest) core.AsyncStep {
@@ -751,9 +806,14 @@ fn (mut w WorkerCtx) start_crud_update(mut out []u8, mut ac core.AsyncCtx, id in
 }
 
 fn (mut w WorkerCtx) render_crud_update(mut out []u8, id int) {
-	w.ro.crud_mu.@lock()
-	w.ro.crud.delete(id) // invalidate the cache-aside entry
-	w.ro.crud_mu.unlock()
+	// Invalidate the cache slot: flip `valid` to false and KEEP the buffer for the
+	// next MISS to reuse. (A map.delete here orphaned the buffer forever under
+	// -gc none — the leak this slab fixes.)
+	if id >= 1 && id < crud_cache_slots {
+		w.ro.crud_mu.@lock()
+		w.ro.crud[id].valid = false
+		w.ro.crud_mu.unlock()
+	}
 	write_resp(mut out, 'application/json', '{"status":"ok"}')
 }
 
@@ -1134,7 +1194,7 @@ fn main() {
 		dataset:  dataset
 		prefixes: prefixes
 		assets:   assets
-		crud:     map[int][]u8{}
+		crud:     []CrudSlot{len: crud_cache_slots}
 		crud_mu:  sync.new_rwmutex()
 		gz:       map[u64][]u8{}
 		gz_mu:    sync.new_rwmutex()

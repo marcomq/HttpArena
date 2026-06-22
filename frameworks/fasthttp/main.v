@@ -40,7 +40,7 @@ struct DbResp {
 
 struct Shared {
 mut:
-	pool     pg.ConnectionPool
+	db       &pg.DB = unsafe { nil }
 	dataset  []DatasetItem
 	prefixes []string
 }
@@ -71,8 +71,8 @@ fn handle(req fasthttp.HttpRequest) !fasthttp.HttpResponse {
 			content: sh.json_response(count, m)
 		}
 	} else if route == '/async-db' {
-		return resp('application/json', sh.async_db(qint(target, 'min'), qint(target, 'max'),
-			qint(target, 'limit')).bytes())
+		return resp('application/json', sh.async_db(qint(target, 'min'), qint(target, 'max'), qint(target,
+			'limit')).bytes())
 	}
 	return resp('text/plain', 'not found'.bytes())
 }
@@ -128,13 +128,13 @@ fn (mut sh Shared) async_db(min i64, max i64, limit i64) string {
 	if lim > 50 {
 		lim = 50
 	}
-	mut conn := sh.pool.acquire() or { return '{"items":[],"count":0}' }
-	rows := conn.exec_param_many('SELECT id, name, category, price, quantity, active, tags, rating_score, rating_count FROM items WHERE price BETWEEN \$1 AND \$2 LIMIT \$3',
-		[min.str(), max.str(), lim.str()]) or {
-		sh.pool.release(conn)
-		return '{"items":[],"count":0}'
-	}
-	sh.pool.release(conn)
+	// db is pool-backed (Go-style db.pg): exec_param_many transparently acquires a
+	// conn for the call and releases it back to the pool — no manual acquire/release.
+	rows := sh.db.exec_param_many('SELECT id, name, category, price, quantity, active, tags, rating_score, rating_count FROM items WHERE price BETWEEN \$1 AND \$2 LIMIT \$3', [
+		min.str(),
+		max.str(),
+		lim.str(),
+	]) or { return '{"items":[],"count":0}' }
 	mut items := []DbItem{cap: rows.len}
 	for row in rows {
 		items << DbItem{
@@ -160,8 +160,8 @@ fn body_int(req fasthttp.HttpRequest) i64 {
 		return 0
 	}
 	raw := req.buffer[req.body.start..req.body.start + req.body.len].bytestr()
-	headers := req.buffer[req.header_fields.start..req.header_fields.start +
-		req.header_fields.len].bytestr()
+	headers :=
+		req.buffer[req.header_fields.start..req.header_fields.start + req.header_fields.len].bytestr()
 	if headers.to_lower().contains('transfer-encoding: chunked') {
 		return dechunk(raw).i64()
 	}
@@ -273,7 +273,11 @@ fn main() {
 	if size > 200 {
 		size = 200
 	}
-	mut pool := pg.new_connection_pool(parse_db_url(url), size)!
+	// max_idle_conns MUST equal max_open_conns: db.pg defaults idle to 2, so any conn
+	// released beyond the 2nd is physically closed and the next acquire pays a full PG
+	// connect handshake — connection churn on every concurrent DB request. Keeping
+	// idle == open makes it a fixed warm pool.
+	mut db := pg.connect(parse_db_url(url), pg.PoolConfig{ max_open_conns: size, max_idle_conns: size })!
 
 	dataset_path := os.getenv_opt('DATASET_PATH') or { '/data/dataset.json' }
 	dataset := json.decode([]DatasetItem, os.read_file(dataset_path) or { '[]' }) or {
@@ -286,7 +290,7 @@ fn main() {
 	}
 
 	mut sh := &Shared{
-		pool:     pool
+		db:       db
 		dataset:  dataset
 		prefixes: prefixes
 	}

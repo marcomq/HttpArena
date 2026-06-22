@@ -29,6 +29,8 @@ frameworks/zix-ws/vendor
 # IDE settings
 *.user
 .vs/
+.vscode/
+.zed/
 
 # Ignore node modules anywhere in the repo
 node_modules/

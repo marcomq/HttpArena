@@ -679,6 +679,26 @@
     "status_5xx": 0
   },
   {
+    "framework": "mq-bridge",
+    "language": "Rust",
+    "rps": 1393,
+    "avg_latency": "22.93ms",
+    "p99_latency": "81.30ms",
+    "cpu": "2793.6%",
+    "memory": "1.5GiB",
+    "connections": 32,
+    "threads": 64,
+    "duration": "5s",
+    "pipeline": 1,
+    "bandwidth": "240.92KB/s",
+    "input_bw": "11.05GB/s",
+    "reconnects": 1391,
+    "status_2xx": 6965,
+    "status_3xx": 0,
+    "status_4xx": 0,
+    "status_5xx": 0
+  },
+  {
     "framework": "phoenix-bandit",
     "language": "Elixir",
     "rps": 704,

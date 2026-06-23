@@ -376,6 +376,25 @@
     "status_5xx": 0
   },
   {
+    "framework": "mq-bridge",
+    "language": "Rust",
+    "rps": 942048,
+    "avg_latency": "4.51ms",
+    "p99_latency": "64.56ms",
+    "cpu": "5595.1%",
+    "memory": "246MiB",
+    "connections": 4096,
+    "threads": 64,
+    "duration": "5s",
+    "pipeline": 1,
+    "bandwidth": "3.24GB",
+    "reconnects": 0,
+    "status_2xx": 4804691,
+    "status_3xx": 0,
+    "status_4xx": 0,
+    "status_5xx": 0
+  },
+  {
     "framework": "ngx-php",
     "language": "PHP",
     "rps": 804422,

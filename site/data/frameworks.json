@@ -490,6 +490,14 @@
     "type": "engine",
     "engine": "io_uring"
   },
+  "mq-bridge-py": {
+    "dir": "mq-bridge-py",
+    "description": "mq-bridge Python bindings (mq_bridge_py). A single http->response route dispatches on request metadata while HTTP framing stays in Rust; cleartext HTTP/1.1 + h2c run on 8080/8082, optional TLS listeners serve HTTP/2 on 8443 and HTTP/1.1 on 8081, and the inline-response fast path keeps responses off the GIL so the Python handler runs only the per-request dispatch.",
+    "repo": "https://github.com/marcomq/mq-bridge",
+    "type": "emerging",
+    "engine": "mq-bridge",
+    "mode": "standard"
+  },
   "mq-bridge": {
     "dir": "mq-bridge",
     "description": "mq-bridge async message-bridging library run as an HTTP server. A single catch-all http->response route dispatches on request metadata and replies through mq-bridge's inline-response fast path; hyper-util's auto connection builder serves HTTP/1.1 and HTTP/2 prior-knowledge (h2c) on the cleartext port (8080) and HTTP/2-over-TLS (ALPN h2) on 8443. Postgres via sqlx for async-db, dataset read from /data/dataset.json, static assets from /data/static, gzip negotiated by the library's Accept-Encoding-gated response compression.",

@@ -114,6 +114,25 @@
     "status_5xx": 0
   },
   {
+    "framework": "mq-bridge-py",
+    "language": "Python",
+    "rps": 943275,
+    "avg_latency": "385.78ms",
+    "p99_latency": "952.41ms",
+    "cpu": "6492.5%",
+    "memory": "27.1GiB",
+    "connections": 4096,
+    "threads": 64,
+    "duration": "5s",
+    "pipeline": 1,
+    "bandwidth": "48.90MB/s",
+    "reconnects": 0,
+    "status_2xx": 4820138,
+    "status_3xx": 0,
+    "status_4xx": 0,
+    "status_5xx": 0
+  },
+  {
     "framework": "quarkus-jvm",
     "language": "Java",
     "rps": 6109902,
